@@ -3737,12 +3737,13 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id001
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiApplicationListDTO'
           description: default response
+        default: *id001
       tags:
       - Applications
     post:
@@ -4001,10 +4002,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id002
           content:
             '*/*': {}
           description: default response
+        default: *id002
       tags:
       - Application Report Data
   /api/v2/applications/{applicationPublicId}/reports/{scanId}/dependencyTree:
@@ -5019,12 +5021,13 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id003
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiOwnerArtifactoryConnectionDTO'
           description: default response
+        default: *id003
       tags:
       - Config Artifactory Connection
     post:
@@ -5054,12 +5057,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
       responses:
-        default:
+        '200': &id004
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
           description: default response
+        default: *id004
       tags:
       - Config Artifactory Connection
     put:
@@ -5089,10 +5093,11 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiArtifactoryConnectionStatusRequestDTO'
       responses:
-        default:
+        '200': &id005
           content:
             application/json: {}
           description: default response
+        default: *id005
       tags:
       - Config Artifactory Connection
   /api/v2/config/artifactoryConnection/{ownerType}/{internalOwnerId}/test:
@@ -5123,12 +5128,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
       responses:
-        default:
+        '200': &id006
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiStatusDTO'
           description: default response
+        default: *id006
       tags:
       - Config Artifactory Connection
   /api/v2/config/artifactoryConnection/{ownerType}/{internalOwnerId}/{artifactoryConnectionId}:
@@ -5159,10 +5165,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id007
           content:
             '*/*': {}
           description: default response
+        default: *id007
       tags:
       - Config Artifactory Connection
     get:
@@ -5192,12 +5199,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id008
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
           description: default response
+        default: *id008
       tags:
       - Config Artifactory Connection
     put:
@@ -5232,12 +5240,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
       responses:
-        default:
+        '200': &id009
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiArtifactoryConnectionDTO'
           description: default response
+        default: *id009
       tags:
       - Config Artifactory Connection
   /api/v2/config/artifactoryConnection/{ownerType}/{internalOwnerId}/{artifactoryConnectionId}/test:
@@ -5268,33 +5277,36 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id010
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiStatusDTO'
           description: default response
+        default: *id010
       tags:
       - Config Artifactory Connection
   /api/v2/config/crowd:
     delete:
       operationId: deleteCrowdConfiguration
       responses:
-        default:
+        '200': &id011
           content:
             '*/*': {}
           description: default response
+        default: *id011
       tags:
       - Config Crowd
     get:
       operationId: getCrowdConfiguration
       responses:
-        default:
+        '200': &id012
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiCrowdConfigurationDTO'
           description: default response
+        default: *id012
       tags:
       - Config Crowd
     put:
@@ -5305,10 +5317,11 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiCrowdConfigurationDTO'
       responses:
-        default:
+        '200': &id013
           content:
             '*/*': {}
           description: default response
+        default: *id013
       tags:
       - Config Crowd
   /api/v2/config/crowd/test:
@@ -5320,12 +5333,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiCrowdConfigurationDTO'
       responses:
-        default:
+        '200': &id014
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiStatusDTO'
           description: default response
+        default: *id014
       tags:
       - Config Crowd
   /api/v2/config/features/{feature}:
@@ -5373,21 +5387,23 @@ paths:
     delete:
       operationId: deleteConfiguration_3
       responses:
-        default:
+        '200': &id015
           content:
             '*/*': {}
           description: default response
+        default: *id015
       tags:
       - Config Proxy Server
     get:
       operationId: getConfiguration_3
       responses:
-        default:
+        '200': &id016
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiProxyServerConfigurationDTO'
           description: default response
+        default: *id016
       tags:
       - Config Proxy Server
     put:
@@ -5398,31 +5414,34 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiProxyServerConfigurationDTO'
       responses:
-        default:
+        '200': &id017
           content:
             '*/*': {}
           description: default response
+        default: *id017
       tags:
       - Config Proxy Server
   /api/v2/config/jira:
     delete:
       operationId: deleteConfiguration_1
       responses:
-        default:
+        '200': &id018
           content:
             '*/*': {}
           description: default response
+        default: *id018
       tags:
       - Config JIRA
     get:
       operationId: getConfiguration_1
       responses:
-        default:
+        '200': &id019
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiJiraConfigurationDTO'
           description: default response
+        default: *id019
       tags:
       - Config JIRA
     put:
@@ -5433,31 +5452,34 @@ paths:
             schema:
               $ref: '#/components/schemas/JsonNode'
       responses:
-        default:
+        '200': &id020
           content:
             '*/*': {}
           description: default response
+        default: *id020
       tags:
       - Config JIRA
   /api/v2/config/mail:
     delete:
       operationId: deleteConfiguration_2
       responses:
-        default:
+        '200': &id021
           content:
             '*/*': {}
           description: default response
+        default: *id021
       tags:
       - Config Mail
     get:
       operationId: getConfiguration_2
       responses:
-        default:
+        '200': &id022
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMailConfigurationDTO'
           description: default response
+        default: *id022
       tags:
       - Config Mail
     put:
@@ -5468,10 +5490,11 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiMailConfigurationDTO'
       responses:
-        default:
+        '200': &id023
           content:
             '*/*': {}
           description: default response
+        default: *id023
       tags:
       - Config Mail
   /api/v2/config/mail/test/{recipientEmail}:
@@ -5489,31 +5512,34 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiMailConfigurationDTO'
       responses:
-        default:
+        '200': &id024
           content:
             '*/*': {}
           description: default response
+        default: *id024
       tags:
       - Config Mail
   /api/v2/config/reverseProxyAuthentication:
     delete:
       operationId: deleteConfiguration_4
       responses:
-        default:
+        '200': &id025
           content:
             '*/*': {}
           description: default response
+        default: *id025
       tags:
       - Config Reverse Proxy Authentication
     get:
       operationId: getConfiguration_4
       responses:
-        default:
+        '200': &id026
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiReverseProxyAuthenticationConfigurationDTO'
           description: default response
+        default: *id026
       tags:
       - Config Reverse Proxy Authentication
     put:
@@ -5524,64 +5550,70 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiReverseProxyAuthenticationConfigurationDTO'
       responses:
-        default:
+        '200': &id027
           content:
             '*/*': {}
           description: default response
+        default: *id027
       tags:
       - Config Reverse Proxy Authentication
   /api/v2/config/saml:
     delete:
       operationId: deleteSamlConfiguration
       responses:
-        default:
+        '200': &id028
           content:
             '*/*': {}
           description: default response
+        default: *id028
       tags:
       - Config SAML
     get:
       operationId: getSamlConfiguration
       responses:
-        default:
+        '200': &id029
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSamlConfigurationResponseDTO'
           description: default response
+        default: *id029
       tags:
       - Config SAML
   /api/v2/config/saml/metadata:
     get:
       operationId: getMetadata
       responses:
-        default:
+        '200': &id030
           content:
             application/xml:
               schema:
                 type: string
           description: default response
+        default: *id030
       tags:
       - Config SAML
   /api/v2/config/sourceControl:
     delete:
       operationId: deleteConfiguration_5
       responses:
-        default:
+        '200': &id031
           content:
             '*/*': {}
           description: default response
+        default: *id031
       tags:
       - Config Source Control
     get:
       operationId: getConfiguration_5
       responses:
-        default:
+        '200': &id032
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSourceControlConfigurationDTO'
           description: default response
+        default: *id032
       tags:
       - Config Source Control
     put:
@@ -5592,10 +5624,11 @@ paths:
             schema:
               $ref: '#/components/schemas/JsonNode'
       responses:
-        default:
+        '200': &id033
           content:
             '*/*': {}
           description: default response
+        default: *id033
       tags:
       - Config Source Control
   /api/v2/cycloneDx/{cdxVersion}/{applicationId}/reports/{reportId}:
@@ -5874,12 +5907,13 @@ paths:
           pattern: public|experimental
           type: string
       responses:
-        default:
+        '200': &id034
           content:
             application/json:
               schema:
                 type: string
           description: default response
+        default: *id034
       tags:
       - Endpoints
   /api/v2/evaluation/applications/{applicationId}:
@@ -6096,10 +6130,11 @@ paths:
           default: true
           type: boolean
       responses:
-        default:
+        '200': &id035
           content:
             application/json: {}
           description: default response
+        default: *id035
       tags:
       - Firewall
   /api/v2/firewall/components/quarantined:
@@ -6143,10 +6178,11 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id036
           content:
             application/json: {}
           description: default response
+        default: *id036
       tags:
       - Firewall
   /api/v2/firewall/components/{repositoryManagerId}/{repositoryId}/evaluate:
@@ -6169,19 +6205,20 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiRepositoryComponentEvaluationRequestList'
       responses:
-        default:
+        '200': &id037
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryComponentEvaluationResultList'
           description: default response
+        default: *id037
       tags:
       - Firewall
   /api/v2/firewall/metrics/embedded:
     get:
       operationId: getFirewallMetrics
       responses:
-        default:
+        '200': &id038
           content:
             application/json:
               schema:
@@ -6189,28 +6226,31 @@ paths:
                   $ref: '#/components/schemas/ApiFirewallMetricsResultDTO'
                 type: object
           description: default response
+        default: *id038
       tags:
       - Firewall
   /api/v2/firewall/quarantine/summary:
     get:
       operationId: getQuarantineSummary
       responses:
-        default:
+        '200': &id039
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiFirewallQuarantineSummaryDTO'
           description: default response
+        default: *id039
       tags:
       - Firewall
   /api/v2/firewall/quarantinedComponentView/configuration/anonymousAccess:
     get:
       operationId: getQuarantinedComponentViewAnonymousAccess
       responses:
-        default:
+        '200': &id040
           content:
             application/json: {}
           description: default response
+        default: *id040
       tags:
       - Firewall
   /api/v2/firewall/quarantinedComponentView/configuration/anonymousAccess/{enabled}:
@@ -6223,17 +6263,18 @@ paths:
         schema:
           type: boolean
       responses:
-        default:
+        '200': &id041
           content:
             application/json: {}
           description: default response
+        default: *id041
       tags:
       - Firewall
   /api/v2/firewall/releaseQuarantine/configuration:
     get:
       operationId: getFirewallAutoUnquarantineConfig
       responses:
-        default:
+        '200': &id042
           content:
             application/json:
               schema:
@@ -6241,6 +6282,7 @@ paths:
                   $ref: '#/components/schemas/ApiFirewallReleaseQuarantineConfigDTO'
                 type: array
           description: default response
+        default: *id042
       tags:
       - Firewall
     put:
@@ -6253,7 +6295,7 @@ paths:
                 $ref: '#/components/schemas/ApiFirewallReleaseQuarantineConfigDTO'
               type: array
       responses:
-        default:
+        '200': &id043
           content:
             application/json:
               schema:
@@ -6261,18 +6303,20 @@ paths:
                   $ref: '#/components/schemas/ApiFirewallReleaseQuarantineConfigDTO'
                 type: array
           description: default response
+        default: *id043
       tags:
       - Firewall
   /api/v2/firewall/releaseQuarantine/summary:
     get:
       operationId: getFirewallUnquarantineSummary
       responses:
-        default:
+        '200': &id044
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiFirewallReleaseQuarantineSummaryDTO'
           description: default response
+        default: *id044
       tags:
       - Firewall
   /api/v2/firewall/repositories/configuration/{repositoryManagerId}:
@@ -6290,12 +6334,13 @@ paths:
           format: int64
           type: integer
       responses:
-        default:
+        '200': &id045
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryListDTO'
           description: default response
+        default: *id045
       tags:
       - Firewall
     post:
@@ -6312,34 +6357,37 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiRepositoryListDTO'
       responses:
-        default:
+        '200': &id046
           content:
             application/json: {}
           description: default response
+        default: *id046
       tags:
       - Firewall
   /api/v2/firewall/repositoryContainer:
     get:
       operationId: getRepositoryContainer
       responses:
-        default:
+        '200': &id047
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryContainerDTO'
           description: default response
+        default: *id047
       tags:
       - Firewall
   /api/v2/firewall/repositoryManagers:
     get:
       operationId: getRepositoryManagers
       responses:
-        default:
+        '200': &id048
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryManagerListDTO'
           description: default response
+        default: *id048
       tags:
       - Firewall
     post:
@@ -6350,12 +6398,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiRepositoryManagerDTO'
       responses:
-        default:
+        '200': &id049
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryManagerDTO'
           description: default response
+        default: *id049
       tags:
       - Firewall
   /api/v2/firewall/repositoryManagers/{repositoryManagerId}:
@@ -6368,10 +6417,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id050
           content:
             application/json: {}
           description: default response
+        default: *id050
       tags:
       - Firewall
     get:
@@ -6383,12 +6433,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id051
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryManagerDTO'
           description: default response
+        default: *id051
       tags:
       - Firewall
   /api/v2/labels/{ownerType}/{ownerId}:
@@ -6419,7 +6470,7 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id052
           content:
             application/json:
               schema:
@@ -6427,6 +6478,7 @@ paths:
                   $ref: '#/components/schemas/ApiLabelDTO'
                 type: array
           description: default response
+        default: *id052
       tags:
       - Labels
     post:
@@ -6456,12 +6508,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiLabelDTO'
       responses:
-        default:
+        '200': &id053
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiLabelDTO'
           description: default response
+        default: *id053
       tags:
       - Labels
     put:
@@ -6491,12 +6544,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiLabelDTO'
       responses:
-        default:
+        '200': &id054
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiLabelDTO'
           description: default response
+        default: *id054
       tags:
       - Labels
   /api/v2/labels/{ownerType}/{ownerId}/applicable:
@@ -6522,12 +6576,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id055
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicableLabels'
           description: default response
+        default: *id055
       tags:
       - Labels
   /api/v2/labels/{ownerType}/{ownerId}/applicable/context/{labelId}:
@@ -6558,12 +6613,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id056
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicableContext'
           description: default response
+        default: *id056
       tags:
       - Labels
   /api/v2/labels/{ownerType}/{ownerId}/{labelId}:
@@ -6594,10 +6650,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id057
           content:
             '*/*': {}
           description: default response
+        default: *id057
       tags:
       - Labels
   /api/v2/licenseLegalMetadata/application/{applicationId}:
@@ -6610,12 +6667,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id058
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiLicenseLegalApplicationReportDTO'
           description: default response
+        default: *id058
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/application/{applicationId}/stage/{stageId}:
@@ -6633,12 +6691,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id059
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiLicenseLegalApplicationReportDTO'
           description: default response
+        default: *id059
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/application/{applicationId}/stage/{stageId}/report:
@@ -6656,12 +6715,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id060
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id060
       tags:
       - License Legal Metadata
     post:
@@ -6678,12 +6738,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id061
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id061
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/application/{applicationId}/stage/{stageId}/report/templateId/{templateId}:
@@ -6706,12 +6767,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id062
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id062
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/multiApplication/activeUserFilter/report/templateId/{templateId}:
@@ -6724,24 +6786,26 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id063
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id063
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/multiApplication/report:
     post:
       operationId: getLicenseLegalMultiApplicationHTMLReport
       responses:
-        default:
+        '200': &id064
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id064
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/multiApplication/report/templateId/{templateId}:
@@ -6754,19 +6818,20 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id065
           content:
             text/html:
               schema:
                 type: string
           description: default response
+        default: *id065
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/report-template:
     get:
       operationId: getAllAttributionReportTemplates
       responses:
-        default:
+        '200': &id066
           content:
             application/json:
               schema:
@@ -6774,6 +6839,7 @@ paths:
                   $ref: '#/components/schemas/AttributionReportTemplateDTO'
                 type: array
           description: default response
+        default: *id066
       tags:
       - License Legal Metadata
     post:
@@ -6784,12 +6850,13 @@ paths:
             schema:
               $ref: '#/components/schemas/AttributionReportTemplateDTO'
       responses:
-        default:
+        '200': &id067
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttributionReportTemplateDTO'
           description: default response
+        default: *id067
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/report-template/{id}:
@@ -6802,10 +6869,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id068
           content:
             '*/*': {}
           description: default response
+        default: *id068
       tags:
       - License Legal Metadata
     get:
@@ -6817,12 +6885,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id069
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AttributionReportTemplateDTO'
           description: default response
+        default: *id069
       tags:
       - License Legal Metadata
   /api/v2/licenseLegalMetadata/{ownerType}/{ownerId}/component:
@@ -6868,12 +6937,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id070
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiLicenseLegalComponentReportDTO'
           description: default response
+        default: *id070
       tags:
       - License Legal Metadata
   /api/v2/malware/defense/evaluate:
@@ -6927,12 +6997,13 @@ paths:
           type: array
           uniqueItems: true
       responses:
-        default:
+        '200': &id071
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiOrganizationListDTO'
           description: default response
+        default: *id071
       tags:
       - Organizations
     post:
@@ -6943,12 +7014,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiOrganizationDTO'
       responses:
-        default:
+        '200': &id072
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiOrganizationDTO'
           description: default response
+        default: *id072
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}:
@@ -6961,10 +7033,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id073
           content:
             '*/*': {}
           description: default response
+        default: *id073
       tags:
       - Organizations
     get:
@@ -6976,12 +7049,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id074
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiOrganizationDTO'
           description: default response
+        default: *id074
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}/move/destination/{destinationId}:
@@ -7004,22 +7078,24 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id075
           content:
             application/json: {}
           description: default response
+        default: *id075
       tags:
       - Organizations
   /api/v2/policies:
     get:
       operationId: getPolicies
       responses:
-        default:
+        '200': &id076
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiPolicyListDTO'
           description: default response
+        default: *id076
       tags:
       - Policies
   /api/v2/policyViolations:
@@ -7338,7 +7414,7 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id077
           content:
             application/json:
               schema:
@@ -7346,13 +7422,14 @@ paths:
                   $ref: '#/components/schemas/ApiPolicyWaiverDTO'
                 type: array
           description: default response
+        default: *id077
       tags:
       - Policy Violation Details
   /api/v2/policyWaiverReasons:
     get:
       operationId: getPolicyWaiverReasons
       responses:
-        default:
+        '200': &id078
           content:
             application/json:
               schema:
@@ -7360,6 +7437,7 @@ paths:
                   $ref: '#/components/schemas/ApiPolicyWaiverReasonDTO'
                 type: array
           description: default response
+        default: *id078
       tags:
       - Policy Waiver Reasons
   /api/v2/policyWaivers/transitive/{ownerType}/{ownerId}/stages/{stageId}:
@@ -8040,12 +8118,13 @@ paths:
             schema:
               type: string
       responses:
-        default:
+        '200': &id079
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiComponentReleasedFromQuarantineDTO'
           description: default response
+        default: *id079
       tags:
       - Repositories
   /api/v2/repositories/{repositoryManagerInstanceId}/{repositoryPublicId}/components/quarantined/pathnames:
@@ -8070,12 +8149,13 @@ paths:
                 type: string
               type: array
       responses:
-        default:
+        '200': &id080
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryPathResponseDTO'
           description: default response
+        default: *id080
       tags:
       - Repositories
   /api/v2/roleMemberships/{ownerType}:
@@ -8775,12 +8855,13 @@ paths:
           format: int64
           type: integer
       responses:
-        default:
+        '200': &id081
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/IdeUsersOverviewDTO'
           description: default response
+        default: *id081
       tags:
       - Scan
   /api/v2/scan/applications/{applicationId}/sources/{source}:
@@ -8811,12 +8892,13 @@ paths:
             schema:
               type: string
       responses:
-        default:
+        '200': &id082
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiThirdPartyScanTicketDTO'
           description: default response
+        default: *id082
       tags:
       - Scan
   /api/v2/scan/applications/{applicationId}/status/{scanRequestId}:
@@ -8834,12 +8916,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id083
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiThirdPartyScanResultDTO'
           description: default response
+        default: *id083
       tags:
       - Scan
   /api/v2/search/advanced:
@@ -8987,12 +9070,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id084
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSearchResultsDTOV2'
           description: default response
+        default: *id084
       tags:
       - Search
   /api/v2/securityOverrides:
@@ -9012,12 +9096,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id085
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiSecurityVulnerabilityOverrideResponseDTOV2'
           description: default response
+        default: *id085
       tags:
       - Security Overrides
   /api/v2/solutions/licensed:
@@ -9030,7 +9115,7 @@ paths:
           default: false
           type: boolean
       responses:
-        default:
+        '200': &id086
           content:
             application/json:
               schema:
@@ -9038,6 +9123,7 @@ paths:
                   $ref: '#/components/schemas/ApiLicensedSolutionDTO'
                 type: array
           description: default response
+        default: *id086
       tags:
       - Solutions
   /api/v2/sourceControl/automaticRoleAssignment/{publicId}:
@@ -9318,12 +9404,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id087
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiPullRequestResults'
           description: default response
+        default: *id087
       tags:
       - Source Control Metrics
   /api/v2/spdx/{applicationId}/reports/{scanId}:
@@ -9356,12 +9443,13 @@ paths:
           default: '2.3'
           type: string
       responses:
-        default:
+        '200': &id088
           content:
             application/json: {}
             application/octet-stream: {}
             application/xml: {}
           description: default response
+        default: *id088
       tags:
       - Spdx
   /api/v2/spdx/{applicationId}/stages/{stageId}:
@@ -9394,12 +9482,13 @@ paths:
           default: '2.3'
           type: string
       responses:
-        default:
+        '200': &id089
           content:
             application/json: {}
             application/octet-stream: {}
             application/xml: {}
           description: default response
+        default: *id089
       tags:
       - Spdx
   /api/v2/telemetry:
@@ -9413,10 +9502,11 @@ paths:
                 type: object
               type: object
       responses:
-        default:
+        '200': &id090
           content:
             '*/*': {}
           description: default response
+        default: *id090
       tags:
       - Telemetry
   /api/v2/userTokens:
@@ -9437,7 +9527,7 @@ paths:
           default: Internal
           type: string
       responses:
-        default:
+        '200': &id091
           content:
             application/json:
               schema:
@@ -9445,49 +9535,54 @@ paths:
                   $ref: '#/components/schemas/ApiUserTokenDTO'
                 type: array
           description: default response
+        default: *id091
       tags:
       - User Tokens
   /api/v2/userTokens/currentUser:
     delete:
       operationId: deleteCurrentUserToken
       responses:
-        default:
+        '200': &id092
           content:
             '*/*': {}
           description: default response
+        default: *id092
       tags:
       - User Tokens
     post:
       operationId: createUserToken
       responses:
-        default:
+        '200': &id093
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserTokenDTO'
           description: default response
+        default: *id093
       tags:
       - User Tokens
   /api/v2/userTokens/currentUser/hasToken:
     get:
       operationId: getUserTokenExistsForCurrentUser
       responses:
-        default:
+        '200': &id094
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserTokenExistsDTO'
           description: default response
+        default: *id094
       tags:
       - User Tokens
   /api/v2/userTokens/purge:
     delete:
       operationId: purgeUserTokens
       responses:
-        default:
+        '200': &id095
           content:
             '*/*': {}
           description: default response
+        default: *id095
       tags:
       - User Tokens
   /api/v2/userTokens/userCode/{userCode}:
@@ -9500,10 +9595,11 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id096
           content:
             '*/*': {}
           description: default response
+        default: *id096
       tags:
       - User Tokens
   /api/v2/userTokens/{username}:
@@ -9521,12 +9617,13 @@ paths:
           default: Internal
           type: string
       responses:
-        default:
+        '200': &id097
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserTokenDTO'
           description: default response
+        default: *id097
       tags:
       - User Tokens
   /api/v2/users:
@@ -9539,12 +9636,13 @@ paths:
           default: Internal
           type: string
       responses:
-        default:
+        '200': &id098
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserListDTO'
           description: default response
+        default: *id098
       tags:
       - Users
     post:
@@ -9555,10 +9653,11 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiUserDTO'
       responses:
-        default:
+        '200': &id099
           content:
             '*/*': {}
           description: default response
+        default: *id099
       tags:
       - Users
   /api/v2/users/{username}:
@@ -9576,10 +9675,11 @@ paths:
           default: Internal
           type: string
       responses:
-        default:
+        '200': &id100
           content:
             '*/*': {}
           description: default response
+        default: *id100
       tags:
       - Users
     get:
@@ -9596,12 +9696,13 @@ paths:
           default: Internal
           type: string
       responses:
-        default:
+        '200': &id101
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserDTO'
           description: default response
+        default: *id101
       tags:
       - Users
     put:
@@ -9618,12 +9719,13 @@ paths:
             schema:
               $ref: '#/components/schemas/ApiUserDTO'
       responses:
-        default:
+        '200': &id102
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiUserDTO'
           description: default response
+        default: *id102
       tags:
       - Users
   /api/v2/vulnerabilities/{refId}:
@@ -9663,12 +9765,13 @@ paths:
         schema:
           type: string
       responses:
-        default:
+        '200': &id103
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SecurityVulnerabilityData'
           description: default response
+        default: *id103
       tags:
       - Vulnerabilities
 security:
