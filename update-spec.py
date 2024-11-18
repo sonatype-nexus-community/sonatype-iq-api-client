@@ -236,7 +236,8 @@ if 'components' in json_spec and 'schemas' in json_spec['components'] \
 if 'paths' in json_spec and '/api/v2/scan/applications/{applicationId}/sources/{source}' in json_spec['paths']:
     if 'post' in json_spec['paths']['/api/v2/scan/applications/{applicationId}/sources/{source}']:
         print('Fixing POST /api/v2/scan/applications/{applicationId}/sources/{source}...')
-        json_spec['paths']['/api/v2/scan/applications/{applicationId}/sources/{source}']['post']['responses']['default']['content']['application/json'].update({
+        json_spec['paths']['/api/v2/scan/applications/{applicationId}/sources/{source}']['post']['responses'][
+            'default']['content']['application/json'].update({
             'schema': {
                 '$ref': '#/components/schemas/ApiThirdPartyScanTicketDTO'
             }
@@ -282,21 +283,34 @@ SCHEMA_NAMES_TO_UPDATE = {
     'SBOM vulnerability analysis request': 'SBOMVulnerabilityAnalysisRequest'
 }
 for schema_to_fix in SCHEMA_NAMES_TO_UPDATE:
-    print(f'Replacing Schema {schema_to_fix} with {SCHEMA_NAMES_TO_UPDATE[schema_to_fix]}',)
+    print(f'Replacing Schema {schema_to_fix} with {SCHEMA_NAMES_TO_UPDATE[schema_to_fix]}', )
     schema_content = json_spec['components']['schemas'].pop(schema_to_fix, None)
     json_spec['components']['schemas'][SCHEMA_NAMES_TO_UPDATE[schema_to_fix]] = schema_content
 
     print(f'   Updating any paths using {schema_to_fix}...')
     ref_to_find = f'#/components/schemas/{schema_to_fix}'
-    ref_to_replace_with= f'#/components/schemas/{SCHEMA_NAMES_TO_UPDATE[schema_to_fix]}'
+    ref_to_replace_with = f'#/components/schemas/{SCHEMA_NAMES_TO_UPDATE[schema_to_fix]}'
     for path in json_spec['paths']:
         for method in json_spec['paths'][path]:
             if 'requestBody' in json_spec['paths'][path][method]:
                 for content_type in json_spec['paths'][path][method]['requestBody']['content']:
                     if '$ref' in json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema']:
-                        if json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema']['$ref'] == ref_to_find:
-                            json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema']['$ref'] = ref_to_replace_with
+                        if json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema'][
+                                '$ref'] == ref_to_find:
+                            json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema'][
+                                '$ref'] = ref_to_replace_with
 
+# v184 Updates
+# ------------------------------------------------------------------------
+
+# Coerce `default` responses to be `200`
+for path in json_spec['paths']:
+    for method in json_spec['paths'][path]:
+        rcs = json_spec['paths'][path][method]['responses'].keys()
+        if '200' not in rcs and 'default' in rcs:
+            print(f'{path} {method} needs a 200')
+            json_spec['paths'][path][method]['responses']['200'] = json_spec['paths'][path][method]['responses'][
+                'default']
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
