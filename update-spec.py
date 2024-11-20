@@ -315,7 +315,10 @@ if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId
                             '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
                         }
                     }
-                }
+                },
+                'description': 'Use this method to obtain remediation suggestions for policy violations on a '
+                               'component basis. Remediations obtained from this method are same as those appearing on '
+                               'the Component Details Page in the UI.'
             }
 
 # Coerce `default` responses to be `200`

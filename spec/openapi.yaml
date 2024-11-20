@@ -4724,6 +4724,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiComponentRemediationValueDTO'
+          description: Use this method to obtain remediation suggestions for policy
+            violations on a component basis. Remediations obtained from this method
+            are same as those appearing on the Component Details Page in the UI.
       tags:
       - Components
   /api/v2/components/versions:
