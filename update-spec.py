@@ -296,12 +296,27 @@ for schema_to_fix in SCHEMA_NAMES_TO_UPDATE:
                 for content_type in json_spec['paths'][path][method]['requestBody']['content']:
                     if '$ref' in json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema']:
                         if json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema'][
-                                '$ref'] == ref_to_find:
+                            '$ref'] == ref_to_find:
                             json_spec['paths'][path][method]['requestBody']['content'][content_type]['schema'][
                                 '$ref'] = ref_to_replace_with
 
 # v184 Updates
 # ------------------------------------------------------------------------
+
+# Fix Response schema for POST /api/v2/components/remediation/{ownerType}/{ownerId}
+if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId}' in json_spec['paths']:
+    if 'post' in json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']:
+        print('Fixing POST /api/v2/components/remediation/{ownerType}/{ownerId}...')
+        json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']['post']['responses'][
+            '200'] = {
+                'content': {
+                    'application/json': {
+                        'schema': {
+                            '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
+                        }
+                    }
+                }
+            }
 
 # Coerce `default` responses to be `200`
 for path in json_spec['paths']:
