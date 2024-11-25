@@ -2,6 +2,7 @@
 outputDir: /local/out/typescript
 generatorName: typescript-fetch
 additionalProperties:
+  licenseName: "Apache-2.0"
   npmName: "@sonatype/nexus-iq-api-client"
   supportsES6: true
   withInterfaces: true
