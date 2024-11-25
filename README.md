@@ -134,7 +134,7 @@ occur.
     openapiRequestResponseValidation.validate(pm);
 3. Start the `openapi-request-response-validation` Container locally:
    ```
-   docker run -p 8080:8080 -v ./spec:/openapi -it --rm gcatanese/openapi-request-response-validation
+   docker run -v $(pwd)/spec:/openapi -it --rm -p 8080:8080 --name openapi-request-response-validation gcatanese/openapi-request-response-validation
    ```
 4. Execute the request in Postman - if the test does not show as passed then you can get details of the failure from two
    places:

@@ -259,8 +259,8 @@ components:
         displayName:
           type: string
         hash:
-          nullable: true
           type: string
+          nullable: true
         packageUrl:
           type: string
         proprietary:
@@ -4724,12 +4724,10 @@ paths:
           content:
             application/json:
               schema:
+                type: object
                 properties:
                   remediation:
                     $ref: '#/components/schemas/ApiComponentRemediationValueDTO'
-                required:
-                - remediation
-                type: object
           description: Use this method to obtain remediation suggestions for policy
             violations on a component basis. Remediations obtained from this method
             are same as those appearing on the Component Details Page in the UI.
