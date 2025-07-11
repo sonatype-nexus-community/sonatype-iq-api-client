@@ -6431,8 +6431,10 @@ paths:
       operationId: getMetadata
       responses:
         '200':
-          description: The IQ Server's metadata service provider descriptor in XML
-            format.
+          content:
+            application/xml:
+              schema:
+                type: string
         '404':
           description: SAML is not configured.
       tags:

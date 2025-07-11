@@ -351,5 +351,16 @@ for path in json_spec['paths']:
 print('Removing schema: SBOMVulnerabilityAnalysisRequest...')
 del(json_spec['components']['schemas']['SBOMVulnerabilityAnalysisRequest'])
 
+print('Re-instate response schema for GET /api/v2/config/saml/metadata as was in IQ 184')
+json_spec['paths']['/api/v2/config/saml/metadata']['get']['responses']['200'] = {
+    'content': {
+        'application/xml': {
+            'schema': {
+                'type': 'string'
+            }
+        }
+    }
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
