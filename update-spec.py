@@ -237,11 +237,17 @@ if 'paths' in json_spec and '/api/v2/scan/applications/{applicationId}/sources/{
     if 'post' in json_spec['paths']['/api/v2/scan/applications/{applicationId}/sources/{source}']:
         print('Fixing POST /api/v2/scan/applications/{applicationId}/sources/{source}...')
         json_spec['paths']['/api/v2/scan/applications/{applicationId}/sources/{source}']['post']['responses'][
-            'default']['content']['application/json'].update({
-            'schema': {
-                '$ref': '#/components/schemas/ApiThirdPartyScanTicketDTO'
-            }
-        })
+            '200'] = {
+            'content': {
+                'application/json': {
+                     'schema': {
+                        '$ref': '#/components/schemas/ApiThirdPartyScanTicketDTO'
+                    }
+                }
+            },
+            'description': 'The response contains a `statusUrl` containing the applicationId and statusId that can be '
+                           'used to check the progress of the SBOM evaluation.'
+        }
 
 # Remove APIs with incomplete schemas
 API_PATHS_TO_REMOVE = {
