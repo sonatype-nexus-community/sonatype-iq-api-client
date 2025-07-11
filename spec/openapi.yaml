@@ -8712,8 +8712,10 @@ paths:
           policy.
       responses:
         '200':
-          description: The response contains the assigned organization id and all
-            other organization details specified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOrganizationDTO'
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}:
