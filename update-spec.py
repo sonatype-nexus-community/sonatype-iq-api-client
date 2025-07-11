@@ -362,5 +362,16 @@ json_spec['paths']['/api/v2/config/saml/metadata']['get']['responses']['200'] = 
     }
 }
 
+print('Re-instate response schema for POST /api/v2/organization as was in IQ 184')
+json_spec['paths']['/api/v2/config/saml/metadata']['get']['responses']['200'] = {
+    'content': {
+        'application/json': {
+            'schema': {
+                '$ref': '#/components/schemas/ApiOrganizationDTO'
+            }
+        }
+    }
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
