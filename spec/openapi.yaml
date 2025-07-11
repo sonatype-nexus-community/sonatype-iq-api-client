@@ -3470,7 +3470,6 @@ components:
         versionRange:
           type: string
       type: object
-    SBOMVulnerabilityAnalysisRequest: null
     SCMUserMappingsDTO:
       properties:
         mappings:

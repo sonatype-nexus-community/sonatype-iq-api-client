@@ -346,5 +346,10 @@ for path in json_spec['paths']:
             json_spec['paths'][path][method]['responses']['200'] = json_spec['paths'][path][method]['responses'][
                 'default']
 
+# v192 Updates
+# ------------------------------------------------------------------------
+print('Removing schema: SBOMVulnerabilityAnalysisRequest...')
+del(json_spec['components']['schemas']['SBOMVulnerabilityAnalysisRequest'])
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
