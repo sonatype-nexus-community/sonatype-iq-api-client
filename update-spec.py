@@ -359,7 +359,8 @@ json_spec['paths']['/api/v2/config/saml/metadata']['get']['responses']['200'] = 
                 'type': 'string'
             }
         }
-    }
+    },
+    'description': 'The IQ Server\'s metadata service provider descriptor in XML format.'
 }
 
 print('Re-instate response schema for POST /api/v2/organization as was in IQ 184')
@@ -370,7 +371,8 @@ json_spec['paths']['/api/v2/organizations']['post']['responses']['200'] = {
                 '$ref': '#/components/schemas/ApiOrganizationDTO'
             }
         }
-    }
+    },
+    'description': 'The response contains the assigned organization id and all other organization details specified.'
 }
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:

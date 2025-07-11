@@ -6435,6 +6435,8 @@ paths:
             application/xml:
               schema:
                 type: string
+          description: The IQ Server's metadata service provider descriptor in XML
+            format.
         '404':
           description: SAML is not configured.
       tags:
@@ -8716,6 +8718,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiOrganizationDTO'
+          description: The response contains the assigned organization id and all
+            other organization details specified.
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}:
