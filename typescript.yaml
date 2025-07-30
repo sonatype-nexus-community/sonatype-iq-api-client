@@ -4,5 +4,6 @@ generatorName: typescript-fetch
 additionalProperties:
   licenseName: "Apache-2.0"
   npmName: "@sonatype/nexus-iq-api-client"
+  prefixParameterInterfaces: true
   supportsES6: true
   withInterfaces: true
