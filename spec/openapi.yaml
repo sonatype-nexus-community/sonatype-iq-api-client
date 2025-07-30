@@ -730,9 +730,7 @@ components:
         applicationName:
           type: string
         applicationPassword:
-          items:
-            type: string
-          type: array
+          type: string
         serverUrl:
           type: string
       type: object

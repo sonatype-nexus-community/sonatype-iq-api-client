@@ -375,5 +375,12 @@ json_spec['paths']['/api/v2/organizations']['post']['responses']['200'] = {
     'description': 'The response contains the assigned organization id and all other organization details specified.'
 }
 
+# v193 Updates
+# ------------------------------------------------------------------------
+print('Correct schema ApiCrowdConfigurationDTO...')
+json_spec['components']['schemas']['ApiCrowdConfigurationDTO']['properties']['applicationPassword'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
