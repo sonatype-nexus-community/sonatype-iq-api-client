@@ -580,6 +580,8 @@ components:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
         id:
           type: string
+        innerSourceAutomatedUpdatesEnabled:
+          $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
         manualPullRequestsEnabled:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
         ownerId:
@@ -728,9 +730,7 @@ components:
         applicationName:
           type: string
         applicationPassword:
-          items:
-            type: string
-          type: array
+          type: string
         serverUrl:
           type: string
       type: object
@@ -2447,6 +2447,8 @@ components:
           type: boolean
         id:
           type: string
+        innerSourceAutomatedUpdatesEnabled:
+          type: boolean
         manualPullRequestsEnabled:
           type: boolean
         ownerId:
@@ -2623,6 +2625,8 @@ components:
           - next-non-failing
           - next-no-violations-with-dependencies
           - next-non-failing-with-dependencies
+          - inner-source-latest-non-breaking
+          - inner-source-latest
           - recommended-non-breaking
           - recommended-non-breaking-with-dependencies
           type: string
@@ -2740,6 +2744,8 @@ components:
           - next-non-failing
           - next-no-violations-with-dependencies
           - next-non-failing-with-dependencies
+          - inner-source-latest-non-breaking
+          - inner-source-latest
           - recommended-non-breaking
           - recommended-non-breaking-with-dependencies
           type: string
@@ -3048,6 +3054,26 @@ components:
         operatorName:
           type: string
       type: object
+    CpeMatchingConfigurationDTO:
+      properties:
+        allowOverride:
+          type: boolean
+        enabled:
+          type: boolean
+        enabledInParent:
+          type: boolean
+        inheritedFromOrganizationAllowOverride:
+          type: boolean
+        inheritedFromOrganizationName:
+          type: string
+      type: object
+    CpeMatchingConfigurationRequest:
+      properties:
+        allowOverride:
+          type: boolean
+        enabled:
+          type: boolean
+      type: object
     CweIdDTO:
       properties:
         id:
@@ -3058,6 +3084,8 @@ components:
       type: object
     DevelopmentPrioritizationResults:
       properties:
+        hasAutoWaiversConfigured:
+          type: boolean
         priorities:
           $ref: '#/components/schemas/ApiPageResultPrioritizedComponent'
         scanIdFromLatestBuildStageEvaluation:
@@ -3144,6 +3172,11 @@ components:
           type: string
       type: object
     JsonNode:
+      type: object
+    KevData:
+      properties:
+        isKev:
+          type: boolean
       type: object
     LabelsByOwner:
       properties:
@@ -3411,6 +3444,8 @@ components:
           - next-non-failing
           - next-no-violations-with-dependencies
           - next-non-failing-with-dependencies
+          - inner-source-latest-non-breaking
+          - inner-source-latest
           - recommended-non-breaking
           - recommended-non-breaking-with-dependencies
           type: string
@@ -3693,6 +3728,8 @@ components:
           type: string
         isAdvancedVulnerabilityDetection:
           type: boolean
+        kevData:
+          $ref: '#/components/schemas/KevData'
         mainSeverity:
           $ref: '#/components/schemas/SecurityVulnerabilitySeverityDTO'
         recommendationMarkdown:
@@ -3975,7 +4012,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.192.0-01
+  version: 1.193.0-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -11694,24 +11731,6 @@ paths:
           description: The requested SBOM(s).
       tags:
       - SPDX
-  /api/v2/telemetry:
-    post:
-      operationId: postExternalTelemetry
-      requestBody:
-        content:
-          application/json:
-            schema:
-              additionalProperties:
-                type: object
-              type: object
-      responses:
-        '200': &id012
-          content:
-            '*/*': {}
-          description: default response
-        default: *id012
-      tags:
-      - Telemetry
   /api/v2/userTokens:
     get:
       description: 'Use this method to retrieve user tokens created within a date
@@ -12011,9 +12030,9 @@ paths:
         name: componentIdentifier
         schema:
           $ref: '#/components/schemas/ComponentIdentifier'
-      - description: Enter the name of the identification source (third-party) for
-          this vulnerability. The response will retrieve vulnerability data from this
-          third-party data source.
+      - description: Enter the name of the component identification source (third-party)
+          for this vulnerability. The response will retrieve vulnerability data from
+          this third-party data source.
         in: query
         name: identificationSource
         schema:
@@ -12092,6 +12111,63 @@ paths:
             </ul></li></ul>
       tags:
       - Vulnerability Details
+  /api/v2/{ownerType}/{internalOwnerId}/configuration/publicSource/cpe:
+    get:
+      description: 'This method allows to retrieve the applicable cpe matching configuration
+        of a given organization or application.<p>Permissions Required: View IQ Elements'
+      operationId: getCpeMatchingConfiguration
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: internalOwnerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Applicable cpe matching configuration for given ownerId
+      tags:
+      - CPE Matching Configuration
+    put:
+      description: 'Use this method to apply a given cpe matching configuration to
+        an organization or application.<p>Permissions Required: Edit IQ Elements'
+      operationId: updateCpeMatchingConfiguration
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: internalOwnerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CpeMatchingConfigurationRequest'
+      responses:
+        '200':
+          content:
+            application/json: {}
+          description: An object containing the cpe configuration applied to the given
+            ownerId
+      tags:
+      - CPE Matching Configuration
 security:
 - BasicAuth: []
 tags:
@@ -12188,6 +12264,9 @@ tags:
 - description: Use this REST API to manage the configuration of Firewall for JFrog
     Artifactory.
   name: Configure Artifactory Connection
+- description: Use the CPE Matching Configuration REST API to add/set/remove cpe matching
+    configuration to organizations and applications
+  name: CPE Matching Configuration
 - description: Use the CycloneDX REST API to generate CycloneDX SBOMs in XML or JSON
     formats, containing coordinates and licenses for components found in a scan report.
   name: CycloneDX
@@ -12279,7 +12358,6 @@ tags:
   name: Source Control Metrics
 - description: Use this REST API to generate SPDX SBOMs in XML or JSON formats.
   name: SPDX
-- name: Telemetry
 - description: Use this REST API to scan SBOMs for your applications.
   name: Third-Party Analysis
 - description: Use this REST API to manage user tokens.
