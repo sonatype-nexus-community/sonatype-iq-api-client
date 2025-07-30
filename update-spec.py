@@ -382,5 +382,10 @@ json_spec['components']['schemas']['ApiCrowdConfigurationDTO']['properties']['ap
     'type': 'string'
 }
 
+print('Correct schema ApiJiraConfigurationDTO...')
+json_spec['components']['schemas']['ApiJiraConfigurationDTO']['properties']['password'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))

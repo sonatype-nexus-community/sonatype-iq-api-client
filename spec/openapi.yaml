@@ -909,9 +909,7 @@ components:
             type: object
           type: object
         password:
-          items:
-            type: string
-          type: array
+          type: string
         url:
           type: string
         username:
