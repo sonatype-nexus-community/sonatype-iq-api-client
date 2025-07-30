@@ -252,7 +252,7 @@ if 'paths' in json_spec and '/api/v2/scan/applications/{applicationId}/sources/{
 # Remove APIs with incomplete schemas
 API_PATHS_TO_REMOVE = {
     '/api/v2/licenseLegalMetadata/customMultiApplication/report': [],
-    '/api/v2/product/license': [],
+    # '/api/v2/product/license': [],
     '/api/v2/config/saml': ['put']
 }
 if 'paths' in json_spec:
