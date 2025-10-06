@@ -27,12 +27,17 @@ jobs:
             - name: Checkout
               # see https://github.com/actions/checkout
               uses: actions/checkout@v4
+
             - name: Run OpenAPI Generator
               uses: addnab/docker-run-action@v3
               with:
                   image: openapitools/openapi-generator-cli:${{ env.OPEN_API_GENERATOR_VERSION }}
                   options: -v ${{ github.workspace }}:/local
                   run: /usr/local/bin/docker-entrypoint.sh batch --clean /local/${{ matrix.language }}.yaml
+
+            - name: Copy LICENSE
+              run: cp LICENSE ./out/${{ matrix.language }}
+
             - name: Save to Cache
               uses: actions/cache/save@v4
               with:
