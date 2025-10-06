@@ -387,5 +387,21 @@ json_spec['components']['schemas']['ApiJiraConfigurationDTO']['properties']['pas
     'type': 'string'
 }
 
+# v195 Updates
+# ------------------------------------------------------------------------
+# Fix schema `EpssData`
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'EpssData' in json_spec['components']['schemas']:
+    print('Fixing schema: EpssData...')
+
+    json_spec['components']['schemas']['EpssData'] = {
+        'properties': {
+            'currentScore': {
+                'format': 'double',
+                'type': 'number'
+            }
+        }
+    }
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
