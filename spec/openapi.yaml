@@ -3293,11 +3293,6 @@ components:
         currentScore:
           format: double
           type: number
-        current_score:
-          format: double
-          type: number
-          writeOnly: true
-      type: object
     GroupingByDTO:
       properties:
         additionalInfo:
