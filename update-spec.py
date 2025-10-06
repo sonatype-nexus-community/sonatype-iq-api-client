@@ -310,28 +310,28 @@ for schema_to_fix in SCHEMA_NAMES_TO_UPDATE:
 # ------------------------------------------------------------------------
 
 # Fix Response schema for POST /api/v2/components/remediation/{ownerType}/{ownerId}
-if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId}' in json_spec['paths']:
-    if 'post' in json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']:
-        print('Fixing POST /api/v2/components/remediation/{ownerType}/{ownerId}...')
-        json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']['post']['responses'][
-            '200'] = {
-            'content': {
-                'application/json': {
-                    'schema': {
-                        'type': 'object',
-                        'properties': {
-                            'remediation': {
-                                '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
-                            }
-                        },
-                        'required': ['remediation']
-                    }
-                }
-            },
-            'description': 'Use this method to obtain remediation suggestions for policy violations on a '
-                           'component basis. Remediations obtained from this method are same as those appearing on '
-                           'the Component Details Page in the UI.'
-        }
+# if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId}' in json_spec['paths']:
+#     if 'post' in json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']:
+#         print('Fixing POST /api/v2/components/remediation/{ownerType}/{ownerId}...')
+#         json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']['post']['responses'][
+#             '200'] = {
+#             'content': {
+#                 'application/json': {
+#                     'schema': {
+#                         'type': 'object',
+#                         'properties': {
+#                             'remediation': {
+#                                 '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
+#                             }
+#                         },
+#                         'required': ['remediation']
+#                     }
+#                 }
+#             },
+#             'description': 'Use this method to obtain remediation suggestions for policy violations on a '
+#                            'component basis. Remediations obtained from this method are same as those appearing on '
+#                            'the Component Details Page in the UI.'
+#         }
 if 'components' in json_spec and 'schemas' in json_spec['components'] \
         and 'ApiComponentDTOV2' in json_spec['components']['schemas']:
     print('Patching schema: ApiComponentDTOV2...')
