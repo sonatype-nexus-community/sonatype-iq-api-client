@@ -310,28 +310,28 @@ for schema_to_fix in SCHEMA_NAMES_TO_UPDATE:
 # ------------------------------------------------------------------------
 
 # Fix Response schema for POST /api/v2/components/remediation/{ownerType}/{ownerId}
-# if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId}' in json_spec['paths']:
-#     if 'post' in json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']:
-#         print('Fixing POST /api/v2/components/remediation/{ownerType}/{ownerId}...')
-#         json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']['post']['responses'][
-#             '200'] = {
-#             'content': {
-#                 'application/json': {
-#                     'schema': {
-#                         'type': 'object',
-#                         'properties': {
-#                             'remediation': {
-#                                 '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
-#                             }
-#                         },
-#                         'required': ['remediation']
-#                     }
-#                 }
-#             },
-#             'description': 'Use this method to obtain remediation suggestions for policy violations on a '
-#                            'component basis. Remediations obtained from this method are same as those appearing on '
-#                            'the Component Details Page in the UI.'
-#         }
+if 'paths' in json_spec and '/api/v2/components/remediation/{ownerType}/{ownerId}' in json_spec['paths']:
+    if 'post' in json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']:
+        print('Fixing POST /api/v2/components/remediation/{ownerType}/{ownerId}...')
+        json_spec['paths']['/api/v2/components/remediation/{ownerType}/{ownerId}']['post']['responses'][
+            '200'] = {
+            'content': {
+                'application/json': {
+                    'schema': {
+                        'type': 'object',
+                        'properties': {
+                            'remediation': {
+                                '$ref': '#/components/schemas/ApiComponentRemediationValueDTO'
+                            }
+                        },
+                        'required': ['remediation']
+                    }
+                }
+            },
+            'description': 'Use this method to obtain remediation suggestions for policy violations on a '
+                           'component basis. Remediations obtained from this method are same as those appearing on '
+                           'the Component Details Page in the UI.'
+        }
 if 'components' in json_spec and 'schemas' in json_spec['components'] \
         and 'ApiComponentDTOV2' in json_spec['components']['schemas']:
     print('Patching schema: ApiComponentDTOV2...')
@@ -399,6 +399,111 @@ if 'components' in json_spec and 'schemas' in json_spec['components'] \
             'currentScore': {
                 'format': 'double',
                 'type': 'number'
+            }
+        }
+    }
+
+# Re-introduce schema `ApiComponentRemediationValueDTO`
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'ApiComponentRemediationValueDTO' not in json_spec['components']['schemas']:
+    print('Re-introducing schema: ApiComponentRemediationValueDTO...')
+    json_spec['components']['schemas']['ApiComponentRemediationValueDTO'] = {
+        'type': 'object',
+        'properties': {
+            'suggestedVersionChange': {
+                '$ref': '#/components/schemas/ApiSuggestedVersionChangeOptionDTO',
+            },
+            'versionChanges': {
+                'type': 'array',
+                'items': {
+                    '$ref': '#/components/schemas/ApiVersionChangeOptionDTO'
+                }
+            }
+        }
+    }
+
+# Re-introduce schema `ApiSuggestedVersionChangeOptionDTO`
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'ApiSuggestedVersionChangeOptionDTO' not in json_spec['components']['schemas']:
+    print('Re-introducing schema: ApiSuggestedVersionChangeOptionDTO...')
+    json_spec['components']['schemas']['ApiSuggestedVersionChangeOptionDTO'] = {
+        'type': 'object',
+        'properties': {
+            'data': {
+                '$ref': '#/components/schemas/ApiComponentChangeActionDTO',
+            },
+            'directDependency': {
+                'type': 'boolean'
+            },
+            'directDependencyData': {
+                'type': 'array',
+                'items': {
+                    '$ref': '#/components/schemas/ApiComponentChangeActionDTO'
+                }
+            },
+            'isGolden': {
+                'type': 'boolean'
+            },
+            'type': {
+                'enum': [
+                    'next-no-violations',
+                    'next-non-failing',
+                    'next-no-violations-with-dependencies',
+                    'next-non-failing-with-dependencies',
+                    'inner-source-latest-non-breaking',
+                    'inner-source-latest',
+                    'recommended-non-breaking',
+                    'recommended-non-breaking-with-dependencies'
+                ],
+                'type': 'string'
+            }
+        }
+    }
+
+# Re-introduce schema `ApiSuggestedVersionChangeOptionDTO`
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'ApiVersionChangeOptionDTO' not in json_spec['components']['schemas']:
+    print('Re-introducing schema: ApiVersionChangeOptionDTO...')
+    json_spec['components']['schemas']['ApiVersionChangeOptionDTO'] = {
+        'type': 'object',
+        'properties': {
+            'data': {
+                '$ref': '#/components/schemas/ApiComponentChangeActionDTO'
+            },
+            'directDependency': {
+                'type': 'boolean'
+            },
+            'directDependencyData': {
+                'type': 'array',
+                'items': {
+                    '$ref': '#/components/schemas/ApiComponentChangeActionDTO'
+                }
+            },
+            'type': {
+                'enum': [
+                    'next-no-violations',
+                    'next-non-failing',
+                    'next-no-violations-with-dependencies',
+                    'next-non-failing-with-dependencies',
+                    'inner-source-latest-non-breaking',
+                    'inner-source-latest',
+                    'recommended-non-breaking',
+                    'recommended-non-breaking-with-dependencies'
+                ],
+                'type': 'string'
+            }
+        }
+    }
+
+# Re-introduce schema `ApiSuggestedVersionChangeOptionDTO`
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'ApiComponentChangeActionDTO' not in json_spec['components']['schemas']:
+    print('Re-introducing schema: ApiComponentChangeActionDTO...')
+    json_spec['components']['schemas']['ApiComponentChangeActionDTO'] = {
+        'type': 'object',
+        'properties': {
+            'component': {
+                '$ref': '#/components/schemas/ApiComponentDTOV2'
             }
         }
     }
