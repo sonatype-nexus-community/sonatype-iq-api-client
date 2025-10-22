@@ -508,5 +508,11 @@ if 'components' in json_spec and 'schemas' in json_spec['components'] \
         }
     }
 
+# Remove `date-time` format for `quarantineDate`
+print('Patching schema: ApiComponentChangeActionDTO...')
+json_spec['components']['schemas']['ApiFirewallQuarantinedComponentDto']['properties']['quarantineDate'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
