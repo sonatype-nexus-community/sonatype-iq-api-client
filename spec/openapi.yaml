@@ -969,7 +969,6 @@ components:
         policyName:
           type: string
         quarantineDate:
-          format: date-time
           type: string
         quarantined:
           type: boolean
