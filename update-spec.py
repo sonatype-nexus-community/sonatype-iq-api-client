@@ -514,5 +514,10 @@ json_spec['components']['schemas']['ApiFirewallQuarantinedComponentDto']['proper
     'type': 'string'
 }
 
+print('Patching schema: ApiComponentChangeActionDTO...')
+json_spec['components']['schemas']['ApiComponentDetailsDTOV2']['properties']['catalogDate'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))

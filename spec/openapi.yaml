@@ -383,7 +383,6 @@ components:
     ApiComponentDetailsDTOV2:
       properties:
         catalogDate:
-          format: date-time
           type: string
         component:
           $ref: '#/components/schemas/ApiComponentDTOV2'
@@ -6812,9 +6811,13 @@ paths:
                 identityProviderXml:
                   description: Enter the SAML metadata XML of your IdP. Refer to the
                     IdP documentation to obtain this metadata.
+                  format: binary
                   type: string
                 samlConfiguration:
                   $ref: '#/components/schemas/ApiSamlConfigurationDTO'
+              required:
+              - identityProviderXml
+              - samlConfiguration
               type: object
       responses:
         '204':
