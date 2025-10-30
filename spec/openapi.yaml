@@ -3299,7 +3299,6 @@ components:
         applicationPublicId:
           type: string
         openTime:
-          format: date-time
           type: string
         policyViolationCount:
           format: int64

@@ -519,5 +519,10 @@ json_spec['components']['schemas']['ApiComponentDetailsDTOV2']['properties']['ca
     'type': 'string'
 }
 
+print('Patching schema: ContainerImageInQuarantineData...')
+json_spec['components']['schemas']['ContainerImageInQuarantineData']['properties']['openTime'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
