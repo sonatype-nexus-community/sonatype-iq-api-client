@@ -521,7 +521,7 @@ json_spec['components']['schemas']['ApiComponentDetailsDTOV2']['properties']['ca
 
 print('Patching schema: ContainerImageInQuarantineData...')
 json_spec['components']['schemas']['ContainerImageInQuarantineData']['properties']['openTime'] = {
-    'type': 'string'
+    'type': 'number'
 }
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:

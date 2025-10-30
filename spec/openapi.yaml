@@ -3299,7 +3299,7 @@ components:
         applicationPublicId:
           type: string
         openTime:
-          type: string
+          type: number
         policyViolationCount:
           format: int64
           type: integer
