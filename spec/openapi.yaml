@@ -6810,9 +6810,6 @@ paths:
       requestBody:
         content:
           multipart/form-data:
-            encoding:
-              samlConfiguration:
-                contentType: application/json
             schema:
               properties:
                 identityProviderXml:
@@ -6821,9 +6818,6 @@ paths:
                   type: string
                 samlConfiguration:
                   $ref: '#/components/schemas/ApiSamlConfigurationDTO'
-              required:
-              - identityProviderXml
-              - samlConfiguration
               type: object
       responses:
         '204':

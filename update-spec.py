@@ -536,14 +536,7 @@ json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['mult
     'description': '''Enter the SAML metadata XML of your IdP. Refer to the IdP documentation to obtain this metadata.''',
     'type': 'string',
 }
-
-print('Add encoding directive for samlConfiguration to ensure JSON serialization')
-json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['encoding'] = {
-    'samlConfiguration': {
-        'contentType': 'application/json'
-    }
-}
-
+del json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['schema']['required']
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
