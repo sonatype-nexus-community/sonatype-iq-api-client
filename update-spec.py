@@ -537,6 +537,13 @@ json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['mult
     'type': 'string',
 }
 
+print('Add encoding directive for samlConfiguration to ensure JSON serialization')
+json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['encoding'] = {
+    'samlConfiguration': {
+        'contentType': 'application/json'
+    }
+}
+
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))

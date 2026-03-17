@@ -6810,6 +6810,9 @@ paths:
       requestBody:
         content:
           multipart/form-data:
+            encoding:
+              samlConfiguration:
+                contentType: application/json
             schema:
               properties:
                 identityProviderXml:
