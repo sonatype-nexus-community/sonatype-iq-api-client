@@ -3063,10 +3063,8 @@ components:
     ApiUserTokenDTO:
       properties:
         createTime:
-          format: date-time
           type: string
         lastAccessTime:
-          format: date-time
           type: string
         passCode:
           type: string
@@ -12649,7 +12647,6 @@ paths:
           content:
             application/json:
               schema:
-                format: date-time
                 type: string
           description: The response contains the token creation time in ISO format.
         '404':

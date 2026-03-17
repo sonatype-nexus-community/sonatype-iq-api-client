@@ -538,5 +538,17 @@ json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['mult
 }
 del json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['schema']['required']
 
+# Remove `date-time` format for various fields relating to User Token APIs
+print('Patching schema: ApiUserTokenDTO...')
+json_spec['components']['schemas']['ApiUserTokenDTO']['properties']['createTime'] = {
+    'type': 'string'
+}
+json_spec['components']['schemas']['ApiUserTokenDTO']['properties']['lastAccessTime'] = {
+    'type': 'string'
+}
+json_spec['paths']['/api/v2/userTokens/currentUser/createTime']['get']['responses']['200']['content']['application/json']['schema'] = {
+    'type': 'string'
+}
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
