@@ -529,5 +529,14 @@ json_spec['components']['schemas']['ApiReportPolicyDataDTOV2']['properties']['re
     'type': 'number'
 }
 
+# v197 Updates
+# ------------------------------------------------------------------------
+print('Fix parameters for PUT /api/v2/config/saml as was in IQ 196')
+json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['schema']['properties']['identityProviderXml'] = {
+    'description': '''Enter the SAML metadata XML of your IdP. Refer to the IdP documentation to obtain this metadata.''',
+    'type': 'string',
+}
+
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
