@@ -371,6 +371,8 @@ components:
         hash:
           nullable: true
           type: string
+        originalPurl:
+          type: string
         packageUrl:
           type: string
         proprietary:
@@ -2014,6 +2016,8 @@ components:
           $ref: '#/components/schemas/ApiLicenseDataDTOV2'
         matchState:
           type: string
+        originalPurl:
+          type: string
         packageUrl:
           type: string
         pathnames:
@@ -2042,6 +2046,8 @@ components:
         hash:
           type: string
         matchState:
+          type: string
+        originalPurl:
           type: string
         packageUrl:
           type: string
@@ -2224,6 +2230,8 @@ components:
         displayName:
           type: string
         hash:
+          type: string
+        originalPurl:
           type: string
         packageUrl:
           type: string
@@ -2654,6 +2662,10 @@ components:
         gitTimeoutSeconds:
           format: int32
           type: integer
+        gpgPassphrase:
+          type: string
+        gpgSigningKey:
+          type: string
         prCommentPurgeWindow:
           format: int32
           type: integer
@@ -2953,6 +2965,12 @@ components:
       type: object
     ApiUserTokenDTO:
       properties:
+        createTime:
+          format: date-time
+          type: string
+        lastAccessTime:
+          format: date-time
+          type: string
         passCode:
           type: string
         realm:
@@ -3183,6 +3201,53 @@ components:
           additionalProperties:
             $ref: '#/components/schemas/SecurityVulnerabilityData'
           type: object
+      type: object
+    CacheInvalidationResponse:
+      properties:
+        entriesInvalidated:
+          format: int64
+          type: integer
+      type: object
+    CascadeComponentProgressDTO:
+      properties:
+        componentId:
+          type: string
+        quarantined:
+          type: boolean
+        repositoryId:
+          type: string
+        repositoryManagerId:
+          type: string
+      type: object
+    CascadeReevaluateTicketDTO:
+      properties:
+        statusUrl:
+          type: string
+      type: object
+    CascadeStatusResponseDTO:
+      properties:
+        evaluated:
+          items:
+            $ref: '#/components/schemas/CascadeComponentProgressDTO'
+          type: array
+        failed:
+          items:
+            $ref: '#/components/schemas/CascadeComponentProgressDTO'
+          type: array
+        pending:
+          items:
+            $ref: '#/components/schemas/CascadeComponentProgressDTO'
+          type: array
+        referenceComponentHash:
+          type: string
+        status:
+          enum:
+          - PENDING
+          - IN_PROGRESS
+          - COMPLETED
+          - NO_COMPONENTS_FOUND
+          - FAILED
+          type: string
       type: object
     ComponentDisplayName:
       properties:
@@ -4261,91 +4326,13 @@ components:
         shortName:
           type: string
       type: object
-    componentLocator:
-      description: Component details about the vulnerable component. Either hash or
-        package URL must be provided
-      properties:
-        hash:
-          description: Component hash
-          type: string
-        packageUrl:
-          description: Component package URL
-          type: string
-      type: object
-    sbomVulnerabilityAnalysisRequest:
-      properties:
-        componentLocator:
-          $ref: '#/components/schemas/componentLocator'
-        vulnerabilityAnalysis:
-          $ref: '#/components/schemas/vulnerabilityAnalysis'
-      required:
-      - componentLocator
-      - vulnerabilityAnalysis
-      type: object
-    vulnerabilityAnalysis:
-      description: Vulnerability analysis details.
-      properties:
-        createdOn:
-          format: date-time
-          readOnly: true
-          type: string
-        detail:
-          description: Detailed description of the impact including methods used during
-            assessment
-          type: string
-        justification:
-          description: The rationale of why the impact analysis state was asserted
-          enum:
-          - code_not_present
-          - code_not_reachable
-          - requires_configuration
-          - requires_dependency
-          - requires_environment
-          - protected_by_compiler
-          - protected_at_runtime
-          - protected_at_perimeter
-          - protected_by_mitigating_control
-          type: string
-        lastUpdatedBy:
-          readOnly: true
-          type: string
-        lastUpdatedOn:
-          format: date-time
-          readOnly: true
-          type: string
-        response:
-          description: Vulnerability analysis response by an author, supplier or manufacturer
-            for the affected component.
-          enum:
-          - can_not_fix
-          - will_not_fix
-          - update
-          - rollback
-          - workaround_available
-          type: string
-        state:
-          description: Vulnerability analysis state.
-          enum:
-          - resolved
-          - resolved_with_pedigree
-          - exploitable
-          - in_triage
-          - false_positive
-          - not_affected
-          type: string
-      required:
-      - detail
-      - justification
-      - response
-      - state
-      type: object
   securitySchemes:
     BasicAuth:
       scheme: basic
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.196.0-01
+  version: 1.197.0-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -6519,6 +6506,25 @@ paths:
           description: Missing or invalid values.
       tags:
       - Config Proxy Server
+  /api/v2/config/integrationVersions/cache:
+    delete:
+      description: 'Clear the integration version cache. Use this endpoint after a
+        new integration version is released to ensure IQ Server immediately recognizes
+        the new version instead of waiting for cache expiration (10 minutes).
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: invalidateCache
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheInvalidationResponse'
+          description: Cache cleared successfully. Returns the number of entries that
+            were invalidated.
+      tags:
+      - Configuration
   /api/v2/config/jira:
     delete:
       description: 'Use this method to delete a Jira configuration.
@@ -8132,6 +8138,70 @@ paths:
             the current month to the current date.</li><li>`autoReleaseQuarantineCountYTD`
             is the number of auto-released quarantine components from the start of
             the current year to the current date.</li></ul>
+      tags:
+      - Firewall
+  /api/v2/firewall/repositories/cascade-reevaluate/componentHash/{componentHash}:
+    post:
+      description: 'Initiate cascade re-evaluation for a component across repository
+        hierarchies.<p>This operation asynchronously re-evaluates the specified component
+        across all repositories where the component exists.<p>The system will automatically
+        discover all eligible repositories based on component presence.<p>Permissions
+        Required: Evaluate Components at Repository Managers level'
+      operationId: initiateCascadeReevaluation
+      parameters:
+      - description: The component hash to re-evaluate across all repositories
+        in: path
+        name: componentHash
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CascadeReevaluateTicketDTO'
+          description: Cascade re-evaluation initiated successfully. The response
+            contains statusUrl with a requestId, which can be used to check the cascade
+            re-evaluation status using the GET method.A requestId for a cascade re-evaluation
+            only lasts 24 hours before being deleted.
+        '403':
+          description: Forbidden - insufficient permissions
+      tags:
+      - Firewall
+  /api/v2/firewall/repositories/cascade-reevaluate/status/{requestId}:
+    get:
+      description: 'Get the status of a cascade re-evaluation request.<p>Returns the
+        current progress of a cascade re-evaluation operation including the list of
+        components that have been evaluated and those still pending. The overall status
+        will be ''pending'' if any components are still being processed, or ''completed''
+        if all components have been evaluated.<p>The response includes:<ul><li><b>status:</b>
+        Overall status (PENDING, IN_PROGRESS, COMPLETED, NO_COMPONENTS_FOUND, FAILED)</li><li><b>referenceComponentHash:</b>
+        The component hash that was re-evaluated</li><li><b>pending:</b> Components
+        still being processed (PENDING status)</li><li><b>evaluated:</b> Components
+        successfully re-evaluated (COMPLETED or NO_COMPONENTS_FOUND status)</li><li><b>failed:</b>
+        Components that could not be re-evaluated (FAILED status)</li></ul><p>Permissions
+        Required: Evaluate Components at Repository Managers level'
+      operationId: getCascadeStatus
+      parameters:
+      - description: The cascade request ID to check status for
+        in: path
+        name: requestId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CascadeStatusResponseDTO'
+          description: Cascade status retrieved successfully
+        '403':
+          description: Forbidden - insufficient permissions
+        '404':
+          description: Cascade request not found. It could have been deleted after
+            24 hours.
       tags:
       - Firewall
   /api/v2/firewall/repositories/configuration/{repositoryManagerId}:
@@ -10947,7 +11017,7 @@ paths:
           enum:
           - USER
           - GROUP
-          pattern: user|group
+          pattern: (?i:user|group)
           type: string
       - description: Enter the value for memberName. This can be a username or group
           name depending upon the value of memberType above.
@@ -10998,7 +11068,7 @@ paths:
           enum:
           - USER
           - GROUP
-          pattern: user|group
+          pattern: (?i:user|group)
           type: string
       - description: Enter the value for memberName. This can be a username or group
           name depending upon the value of memberType above.
@@ -11092,7 +11162,7 @@ paths:
           enum:
           - USER
           - GROUP
-          pattern: user|group
+          pattern: (?i:user|group)
           type: string
       - description: Enter the value for memberName. This can be a username or group
           name depending upon the value of memberType above.
@@ -11149,7 +11219,7 @@ paths:
           enum:
           - USER
           - GROUP
-          pattern: user|group
+          pattern: (?i:user|group)
           type: string
       - description: Enter the value for memberName. This can be a username or group
           name depending upon the value of memberType above.
@@ -11180,455 +11250,6 @@ paths:
           description: The response contains the role IDs, role names and descriptions.
       tags:
       - Roles
-  /api/v2/sbom/applications/{applicationId}:
-    get:
-      description: Gets a paginated list of SBOMs for an application
-      operationId: getSbomMetadataSummaryForApplication
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - deprecated: true
-        description: Deprecated, use sortBy and asc instead. Sort results by import
-          date. Allowed values [asc|desc]. default = asc
-        in: query
-        name: sortByDate
-        schema:
-          default: asc
-          type: string
-      - description: Number of items to return by page. default = 10
-        in: query
-        name: pageSize
-        schema:
-          default: 10
-          format: int32
-          type: integer
-      - description: Current page number. default = 1
-        in: query
-        name: page
-        schema:
-          default: 1
-          format: int32
-          type: integer
-      - description: Criteria to sort the results. default = IMPORT_DATE, when used
-          sortByDate is ignored
-        in: query
-        name: sortBy
-        schema:
-          default: IMPORT_DATE
-          enum:
-          - IMPORT_DATE
-          - RELEASE_STATUS
-          - VULNERABILITY
-          type: string
-      - description: Order mode ASC=true or DESC=false. default = true
-        in: query
-        name: asc
-        schema:
-          default: true
-          type: boolean
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: list of the sboms
-      summary: Gets a paginated list of SBOMs for an application
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/status/{importRequestId}:
-    get:
-      description: Gets status of a sbom import.
-      operationId: getImportStatus
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: The id of the import request
-        in: path
-        name: importRequestId
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: Sbom import completed successfully.
-        '404':
-          description: Sbom import still in progress.
-      summary: Get sbom import status
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/versions:
-    get:
-      description: Gets a list of active sbom versions by application id
-      operationId: getActiveSbomVersionListByApplication
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: list of the active sbom versions by application id
-      summary: Gets a list of active sbom versions by application id
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/versions/{version}:
-    delete:
-      description: Deletes a specific sbom version including it's original contents
-        and updates
-      operationId: deleteSbomVersion
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: URL Encoded version value of the sbom to be deleted
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      responses:
-        '204':
-          description: Delete successful
-        '404':
-          description: Supplied sbom version not found
-      summary: Delete sbom version
-      tags:
-      - SBOM
-    get:
-      description: Downloads a specific sbom version in its original or current form
-      operationId: getSbomVersion
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: URL Encoded version value of the sbom
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      - description: The state of the sbom version. Allowed values [original|current].
-          default = current
-        in: query
-        name: state
-        schema:
-          default: current
-          type: string
-      - description: Target specification of the sbom. Allowed values [cyclonedx1.6|cyclonedx1.5|spdx2.2|spdx2.3].
-          default = cyclonedx1.6
-        in: query
-        name: specification
-        schema:
-          default: cyclonedx1.6
-          type: string
-      - description: Output format(json/xml) of the sbom. Changing the output format
-          only applicable when downloading the current form of the SBOM. The original
-          sbom will always return in the original form that it was ingested. When
-          requesting `current` form and if this header value is not present the sbom
-          will be returned in its original ingested format. Allowed values {'application/json'|'application/xml'}.
-          default = null
-        in: header
-        name: Accept
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                description: SBOM content in JSON format
-                type: string
-            application/xml:
-              schema:
-                description: SBOM content in XML format
-                type: string
-          description: Content of the sbom
-        '404':
-          description: Supplied sbom version not found
-      summary: Gets a sbom version
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/versions/{version}/components:
-    get:
-      description: Lists the components in a specific sbom version with data about
-        vulnerabilities and licenses
-      operationId: getSbomComponents
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: URL Encoded version value of the sbom to query its components
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      - description: If provided, filter components by the given threat level on their
-          vulnerabilities
-        in: query
-        name: vulnerabilityThreatLevels
-        schema:
-          items:
-            enum:
-            - NONE
-            - LOW
-            - MEDIUM
-            - HIGH
-            - CRITICAL
-            type: string
-          type: array
-          uniqueItems: true
-      - description: If provided, filter components by the given dependency types
-        in: query
-        name: dependencyTypes
-        schema:
-          items:
-            enum:
-            - DIRECT
-            - TRANSITIVE
-            - UNSPECIFIED
-            type: string
-          type: array
-          uniqueItems: true
-      - description: If provided, filter components by the given search criteria
-        in: query
-        name: filter
-        schema:
-          type: string
-      - description: Criteria to sort the results. default = VULNERABILITIES
-        in: query
-        name: sortBy
-        schema:
-          default: VULNERABILITIES
-          enum:
-          - TYPE
-          - PERCENTAGE_ANNOTATED
-          - RELEASE_STATUS_PERCENTAGE
-          - VULNERABILITIES
-          - DISPLAY_NAME
-          type: string
-      - description: Order mode ASC=true or DESC=false. default = false
-        in: query
-        name: asc
-        schema:
-          default: false
-          type: boolean
-      - description: Current page number. default = 1
-        in: query
-        name: page
-        schema:
-          default: 1
-          format: int32
-          type: integer
-      - description: Number of items to return by page. default = 50
-        in: query
-        name: pageSize
-        schema:
-          default: 50
-          format: int32
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: List of components in the sbom
-      summary: Gets the components found in a specific sbom version
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/versions/{version}/vulnerability/{refId}:
-    get:
-      description: 'Use this method to retrieve details for a vulnerability belongs
-        to a specific sbom version '
-      operationId: getVulnerabilityDetails
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: The version for a specific SBOM where the vulnerability is present
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      - description: The vulnerability id of a vulnerability
-        in: path
-        name: refId
-        required: true
-        schema:
-          type: string
-      - description: (One of packageUrl or componentHash is required) Enter the packageUrl
-          of the component with the vulnerability
-        in: query
-        name: packageUrl
-        schema:
-          type: string
-      - description: (One of packageUrl or componentHash is required) Enter the componentHash
-          of the component with the vulnerability
-        in: query
-        name: componentHash
-        schema:
-          type: string
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: The response contains vulnerability details corresponding to
-            the vulnerability
-        '404':
-          description: Target vulnerability not found
-      tags:
-      - SBOM
-  /api/v2/sbom/applications/{applicationId}/versions/{version}/vulnerability/{refId}/analysis:
-    delete:
-      description: Deletes a Vulnerability analysis for a given component.
-      operationId: deleteVulnerabilityAnalysis
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: The version for a specific SBOM where the vulnerability is present
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      - description: The vulnerability id of a vulnerability
-        in: path
-        name: refId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/componentLocator'
-        description: Hash or packageUrl to identify the component
-        required: true
-      responses:
-        '204':
-          description: Vulnerability analysis deleted
-        '404':
-          description: Vulnerability analysis not found
-      summary: Deletes a Vulnerability analysis for a given component.
-      tags:
-      - SBOM
-    put:
-      description: Updates a vulnerability analysis annotation for a specific SBOM
-        vulnerability
-      operationId: saveVulnerabilityAnalysis
-      parameters:
-      - description: The internal id of the application
-        in: path
-        name: applicationId
-        required: true
-        schema:
-          type: string
-      - description: The version for a specific SBOM where the vulnerability is present
-        in: path
-        name: version
-        required: true
-        schema:
-          type: string
-      - description: The vulnerability id of a vulnerability
-        in: path
-        name: refId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/sbomVulnerabilityAnalysisRequest'
-        description: Vulnerability analysis details with component information
-        required: true
-      responses:
-        '200':
-          content:
-            application/json: {}
-          description: Vulnerability analysis annotation updated successfully
-        '404':
-          description: Target vulnerability not found
-      summary: Updates a vulnerability analysis annotation for a specific SBOM vulnerability
-      tags:
-      - SBOM
-  /api/v2/sbom/import:
-    post:
-      description: Imports a new sbom version to an existing application
-      operationId: importSbom
-      parameters:
-      - description: Enable importing as a binary file.
-        in: query
-        name: enableBinaryImport
-        schema:
-          default: false
-          type: boolean
-      - description: Skip the SBOM validation if an error occurs.
-        in: query
-        name: ignoreValidationError
-        schema:
-          default: false
-          type: boolean
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              properties:
-                applicationId:
-                  description: The internal id of the application.
-                  type: string
-                applicationVersion:
-                  description: The SBOM version.
-                  type: string
-                file:
-                  description: Your SBOM.
-                  format: binary
-                  type: string
-              required:
-              - applicationId
-              - file
-              type: object
-      responses:
-        '202':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiThirdPartyScanTicketDTO'
-          description: Import successful. URL to check the status of the import returned
-        '400':
-          description: Invalid/Unsupported data provided for sbom import
-      summary: Import a new sbom version
-      tags:
-      - SBOM
   /api/v2/scan/applications/{applicationId}/sources/{source}:
     post:
       description: 'Use this method to perform an analysis of an SBOM.
@@ -13146,7 +12767,6 @@ tags:
 
     Use this REST API to retrieve role IDs, role names and descriptions.'
   name: Roles
-- name: SBOM
 - description: Use this REST API to retrieve security vulnerabilities that have been
     overridden.
   name: Security Vulnerability Overrides
