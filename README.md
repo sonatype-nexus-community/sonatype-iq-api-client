@@ -51,14 +51,7 @@ The below subsections document these changes and limitations - but you should re
 
 ### APIs Excluded from Generation
 
-The following API endpoints are removed from the schema prior to generation of the API Client libraries.
-
-| API Endpoint                                               | Method | Reason                                                                              |
-|------------------------------------------------------------|--------|-------------------------------------------------------------------------------------|
-| /api/v2/licenseLegalMetadata/customMultiApplication/report | POST   | Relies on a schema of undefined `object` - generated code is invalid in Typescript. |
-| /api/v2/product/license                                    | POST   | Relies on a schema of undefined `object` - generated code is invalid in Typescript. |
-| /api/v2/product/license                                    | DELETE | Relies on a schema of undefined `object` - generated code is invalid in Typescript. |
-| /api/v2/config/saml                                        | PUT    | Relies on a schema of undefined `object` - generated code is invalid in Typescript. |
+*See `update-spec.py` for all changes.*
 
 ### Additional Changes to OpenAPI Schema prior to Generation
 
