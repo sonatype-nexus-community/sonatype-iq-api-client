@@ -3060,9 +3060,18 @@ components:
             $ref: '#/components/schemas/ApiUserDTO'
           type: array
       type: object
+    ApiUserTokenConfigurationDTO:
+      properties:
+        userTokenDefaultExpirationDays:
+          format: int32
+          type: integer
+      type: object
     ApiUserTokenDTO:
       properties:
         createTime:
+          type: string
+        expirationDate:
+          format: date-time
           type: string
         lastAccessTime:
           type: string
@@ -4472,9 +4481,13 @@ components:
     BasicAuth:
       scheme: basic
       type: http
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.198.0-01
+  version: 1.199.0-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -5793,6 +5806,19 @@ paths:
           description: Component Claim for this hash does not exist.
       tags:
       - Claim Components
+  /api/v2/componentSearch/downloadComponentSearchReport:
+    get:
+      description: 'Export component search results as CSV (streaming). Identifies
+        applications containing components affected by CVE-2025-55182. Results are
+        streamed to avoid memory issues with large datasets. Keep-alive mechanism
+        prevents ALB timeouts during long-running queries. <p>Permissions Required:
+        View IQ Elements'
+      operationId: exportComponentSearchReport
+      responses:
+        '200':
+          description: CSV file containing the component search results
+      tags:
+      - Component Search
   /api/v2/components/details:
     post:
       description: Use this method to retrieve data related to a component.
@@ -7130,6 +7156,84 @@ paths:
           description: SCM configuration successfully updated.
       tags:
       - Config Source Control
+  /api/v2/config/userTokens:
+    delete:
+      description: 'Use this method to reset user token configuration properties to
+        system defaults. Returns the current configuration after reset.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: resetConfiguration
+      parameters:
+      - in: query
+        name: property
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Configuration reset successfully
+        '400':
+          description: No properties specified or invalid properties
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
+    get:
+      description: 'Use this method to retrieve user token configuration.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: getConfiguration_6
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Current user token configuration
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
+    put:
+      description: 'Use this method to update user token configuration. Null values
+        are ignored (no change). Returns the current configuration after applying
+        changes.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: updateConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Configuration updated successfully
+        '400':
+          description: Invalid configuration values
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
   /api/v2/config/zscaler:
     delete:
       description: 'Use this method to disable or remove the Zscaler configuration.
@@ -7149,7 +7253,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_6
+      operationId: getConfiguration_7
       responses:
         '200':
           content:
@@ -12926,6 +13030,7 @@ paths:
             as code injection, authentication flaws and data leakage.</li><li>UNSHADER
             means the vulnerability is discovered by the Shaded Vulnerability Algorithm.</li>
             </ul></li></ul>
+      security: []
       tags:
       - Vulnerability Details
   /api/v2/vulnerabilities/{refId}:
@@ -13029,6 +13134,7 @@ paths:
             as code injection, authentication flaws and data leakage.</li><li>UNSHADER
             means the vulnerability is discovered by the Shaded Vulnerability Algorithm.</li>
             </ul></li></ul>
+      security: []
       tags:
       - Vulnerability Details
   /api/v2/{ownerType}/{internalOwnerId}/configuration/publicSource/cpe:
@@ -13090,6 +13196,7 @@ paths:
       - CPE Matching Configuration
 security:
 - BasicAuth: []
+  BearerAuth: []
 tags:
 - description: Use the Advanced Search REST API to perform searches on Lifecycle application
     scan reports.
@@ -13131,8 +13238,7 @@ tags:
     Component Labels can be used as attributes of a component at the time of creating
     policies. A policy violation can be triggered based on the component label.'
   name: Component Labels
-- description: Use this REST API to search for components in application evaluation
-    reports.
+- description: Search applications containing specific components
   name: Component Search
 - description: Use this REST API to retrieve a component's security vulnerability
     data, license data, age and popularity.
@@ -13281,6 +13387,8 @@ tags:
   name: SPDX
 - description: Use this REST API to scan SBOMs for your applications.
   name: Third-Party Analysis
+- description: Use this REST API to manage user token expiration configuration.
+  name: User Token Configuration
 - description: Use this REST API to manage user tokens.
   name: User Tokens
 - description: Use this REST API to manage users.
