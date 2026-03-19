@@ -9120,7 +9120,6 @@ paths:
           description: Base URL not configured or invalid request
       summary: Generate GitHub App manifest
       tags:
-      - GitHub App
       - GitHub App Configuration
   /api/v2/githubApp/redirect:
     get:
@@ -9153,7 +9152,6 @@ paths:
           description: Insufficient permissions
       summary: GitHub App registration redirect callback
       tags:
-      - GitHub App
       - GitHub App Configuration
   /api/v2/githubApp/setupInstallation:
     get:
