@@ -366,6 +366,54 @@ components:
             type: string
           type: array
       type: object
+    ApiCiConfigurationDto:
+      properties:
+        advancedProperties:
+          items:
+            type: string
+          type: array
+        download:
+          $ref: '#/components/schemas/DownloadConfig'
+        enableDebugLogging:
+          type: boolean
+        failBuildOnNetworkError:
+          type: boolean
+        failBuildOnPolicyWarnings:
+          type: boolean
+        failBuildOnReachabilityErrors:
+          type: boolean
+        failBuildOnScanningErrors:
+          type: boolean
+        moduleExcludes:
+          items:
+            type: string
+          type: array
+        parameterPriority:
+          type: string
+        proxy:
+          $ref: '#/components/schemas/ProxyConfig'
+        reachability:
+          $ref: '#/components/schemas/ReachabilityConfig'
+        resultFile:
+          type: string
+        sarifFile:
+          type: string
+        scanPatterns:
+          items:
+            type: string
+          type: array
+        unstableBuildOnPolicyWarnings:
+          type: boolean
+      type: object
+    ApiCiConfigurationResponseDto:
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiCiConfigurationDto'
+        source:
+          additionalProperties:
+            type: string
+          type: object
+      type: object
     ApiComponentChangeActionDTO:
       properties:
         component:
@@ -612,6 +660,8 @@ components:
       type: object
     ApiCompositeSourceControlDTO:
       properties:
+        authenticationType:
+          $ref: '#/components/schemas/ApiCompositeValueDTOString'
         baseBranch:
           $ref: '#/components/schemas/ApiCompositeValueDTOString'
         closePrAfterDays:
@@ -622,6 +672,8 @@ components:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
         commitStatusEnabled:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
+        githubApp:
+          $ref: '#/components/schemas/ApiCompositeValueDTOGitHubAppInfo'
         id:
           type: string
         innerSourceAutomatedUpdatesEnabled:
@@ -659,6 +711,15 @@ components:
           type: boolean
         value:
           type: boolean
+      type: object
+    ApiCompositeValueDTOGitHubAppInfo:
+      properties:
+        parentName:
+          type: string
+        parentValue:
+          $ref: '#/components/schemas/GitHubAppInfo'
+        value:
+          $ref: '#/components/schemas/GitHubAppInfo'
       type: object
     ApiCompositeValueDTOInteger:
       properties:
@@ -2777,6 +2838,8 @@ components:
       type: object
     ApiSourceControlDTO:
       properties:
+        authenticationType:
+          type: string
         baseBranch:
           type: string
         closePrAfterDays:
@@ -3228,6 +3291,22 @@ components:
             $ref: '#/components/schemas/TagsByOwnerDTO'
           type: array
       type: object
+    ApplicationSummary:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        publicId:
+          type: string
+      type: object
+    ApplicationSummaryList:
+      properties:
+        applicationSummaries:
+          items:
+            $ref: '#/components/schemas/ApplicationSummary'
+          type: array
+      type: object
     ApplicationTag:
       properties:
         applicationId:
@@ -3537,11 +3616,32 @@ components:
         scanIdFromLatestBuildStageEvaluation:
           type: string
       type: object
+    DownloadConfig:
+      properties:
+        iqCliUrl:
+          type: string
+        iqCliVersion:
+          type: string
+      type: object
     EpssData:
       properties:
         currentScore:
           format: double
           type: number
+    GitHubAppInfo:
+      properties:
+        accountName:
+          type: string
+        configurationDate:
+          type: string
+        id:
+          type: string
+        installationId:
+          format: int64
+          type: integer
+        name:
+          type: string
+      type: object
     GroupingByDTO:
       properties:
         additionalInfo:
@@ -3595,6 +3695,34 @@ components:
         ownerApplicationId:
           type: string
         ownerApplicationName:
+          type: string
+      type: object
+    JavaAnalysisConfig:
+      properties:
+        enabled:
+          type: boolean
+        entrypointStrategy:
+          type: string
+        namespaces:
+          items:
+            type: string
+          type: array
+      type: object
+    JavaScriptAnalysisConfig:
+      properties:
+        enabled:
+          type: boolean
+        jsExcludes:
+          items:
+            type: string
+          type: array
+        jsSources:
+          items:
+            type: string
+          type: array
+        nodeJsExecutable:
+          type: string
+        projectRoot:
           type: string
       type: object
     KevData:
@@ -3983,6 +4111,20 @@ components:
           type: integer
         waiverExpirationDetails:
           type: string
+      type: object
+    ProxyConfig:
+      properties:
+        host:
+          type: string
+      type: object
+    ReachabilityConfig:
+      properties:
+        failOnError:
+          type: boolean
+        javaAnalysis:
+          $ref: '#/components/schemas/JavaAnalysisConfig'
+        javaScriptAnalysis:
+          $ref: '#/components/schemas/JavaScriptAnalysisConfig'
       type: object
     ReferenceLink:
       properties:
@@ -4487,7 +4629,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.200.0-01
+  version: 1.201.0-02
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -6184,7 +6326,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration
+      operationId: deleteConfiguration_1
       parameters:
       - description: Enter the names of the system properties. Values provided for
           name are case-sensitive.
@@ -6208,7 +6350,7 @@ paths:
 
         Permissions required: Edit System Configuration and Users or system property
         dependent'
-      operationId: getConfiguration
+      operationId: getConfiguration_1
       parameters:
       - description: Enter the names of the system properties. Values provided for
           name are case-sensitive.
@@ -6234,7 +6376,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration
+      operationId: setConfiguration_1
       requestBody:
         content:
           application/json:
@@ -6570,6 +6712,146 @@ paths:
             status of the connection.
       tags:
       - Configure Artifactory Connection
+  /api/v2/config/ci/{ownerType}/{ownerId}:
+    delete:
+      description: 'Use this method to delete CI integration configuration for the
+        specified owner.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: deleteConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: CI configuration was deleted successfully.
+        '404':
+          description: CI configuration not found for the specified owner.
+      tags:
+      - CI Configuration
+    get:
+      description: 'Use this method to retrieve CI integration configuration for the
+        specified owner.
+
+
+        Set the `direct` query parameter to `true` to retrieve only the configuration
+        directly associated with the specified owner. Set it to `false` (default)
+        to retrieve the merged configuration from the organization hierarchy, where
+        configurations from parent organizations are combined with lower levels taking
+        precedence.
+
+
+        The response includes a `source` map that indicates which owner (organization
+        or application) contributed each configuration field when using merged mode.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - description: Set to true to retrieve only direct configuration, false (default)
+          to retrieve merged configuration from hierarchy
+        in: query
+        name: direct
+        schema:
+          default: false
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCiConfigurationResponseDto'
+          description: 'The response contains:
+
+            <ul>
+
+            <li>`configuration` - the CI integration configuration as a JSON object</li>
+
+            <li>`source` - a map of field names to owner IDs indicating provenance
+            (empty for direct queries)</li>
+
+            </ul>'
+        '404':
+          description: No CI configuration found for the specified owner or its hierarchy.
+      tags:
+      - CI Configuration
+    put:
+      description: 'Use this method to create or update CI integration configuration
+        for the specified owner.
+
+
+        The configuration is stored as a JSON object to support various CI systems
+        (GitHub Actions, GitLab CI, etc.). String values must be non-empty.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: setConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiCiConfigurationDto'
+        description: Provide the CI integration configuration as a JSON object. The
+          structure supports different CI systems.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCiConfigurationDto'
+          description: CI configuration was saved successfully.
+        '400':
+          description: Invalid configuration provided (e.g., empty strings).
+      tags:
+      - CI Configuration
   /api/v2/config/crowd:
     delete:
       description: 'Use this method to remove an existing Atlassian Crowd Configuration.
@@ -6693,7 +6975,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_3
+      operationId: deleteConfiguration_4
       responses:
         '204':
           description: HTTP proxy server configuration deleted successfully.
@@ -6706,7 +6988,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_3
+      operationId: getConfiguration_4
       responses:
         '200':
           content:
@@ -6730,7 +7012,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_3
+      operationId: setConfiguration_4
       requestBody:
         content:
           application/json:
@@ -6779,7 +7061,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_1
+      operationId: deleteConfiguration_2
       responses:
         '204':
           description: Jira configuration deleted.
@@ -6790,7 +7072,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_1
+      operationId: getConfiguration_2
       responses:
         '200':
           content:
@@ -6812,7 +7094,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_1
+      operationId: setConfiguration_2
       requestBody:
         content:
           application/json:
@@ -6830,7 +7112,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_2
+      operationId: deleteConfiguration_3
       responses:
         '204':
           description: SMTP configuration was removed successfully.
@@ -6843,7 +7125,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_2
+      operationId: getConfiguration_3
       responses:
         '200':
           content:
@@ -6871,7 +7153,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_2
+      operationId: setConfiguration_3
       requestBody:
         content:
           application/json:
@@ -6992,7 +7274,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_4
+      operationId: deleteConfiguration_5
       responses:
         '204':
           description: Reverse proxy server configuration deleted successfully.
@@ -7003,7 +7285,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_4
+      operationId: getConfiguration_5
       responses:
         '200':
           content:
@@ -7026,7 +7308,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_4
+      operationId: setConfiguration_5
       requestBody:
         content:
           application/json:
@@ -7151,7 +7433,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_5
+      operationId: deleteConfiguration_6
       responses:
         '204':
           description: SCM configuration deleted successfully.
@@ -7162,7 +7444,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_5
+      operationId: getConfiguration_6
       responses:
         '200':
           content:
@@ -7202,7 +7484,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_5
+      operationId: setConfiguration_6
       requestBody:
         content:
           application/json:
@@ -7272,7 +7554,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_6
+      operationId: getConfiguration_7
       responses:
         '200':
           content:
@@ -7320,7 +7602,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_6
+      operationId: deleteConfiguration_7
       responses:
         '204':
           description: Zscaler configuration was removed successfully.
@@ -7333,7 +7615,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_7
+      operationId: getConfiguration_8
       responses:
         '200':
           content:
@@ -7355,7 +7637,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_6
+      operationId: setConfiguration_7
       requestBody:
         content:
           application/json:
@@ -8168,6 +8450,32 @@ paths:
       description: 'Use this method to evaluate components (max. 100).
 
 
+        **Hash Requirements by Format Type:**
+
+
+        **Coordinate-Based Formats** (hash NOT required when using packageUrl):
+
+        - golang, conan, cargo, cocoapods, cran, conda, composer, hf-model
+
+        - These formats identify components by coordinates (name+version) rather than
+        file hash
+
+        - When using packageUrl, hash is optional
+
+        - If hash is provided, it will be used
+
+
+        **Hash-Based Formats** (hash REQUIRED):
+
+        - maven, npm, pypi, nuget, docker, rubygems, and others
+
+        - Hash must ALWAYS be provided to identify the exact file content
+
+        - Hash is required regardless of whether pathname or packageUrl is used
+
+        - Missing hash for these formats will result in incorrect component identification
+
+
         Permissions required: Evaluate Individual Components'
       operationId: evaluateComponents_1
       parameters:
@@ -8188,9 +8496,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApiRepositoryComponentEvaluationRequestList'
-        description: Provide the array of the component identifiers to be evaluated,
-          using the component hash and the (packageUrl or pathname). A maximum of
-          100 components can be evaluated in one request.
+        description: 'Provide the array of component identifiers to be evaluated.
+          Each component requires **one of the following combinations**:
+
+
+          **For Coordinate-Based Formats (golang, conan, cargo, cocoapods, cran, conda,
+          composer, hf-model):**
+
+          - **packageUrl only** - Hash is optional
+
+          - **packageUrl + hash** - Hash is optional, will be used if provided
+
+          - **pathname + hash** - Hash required (pathname approach always requires
+          hash)
+
+
+          **For Hash-Based Formats (maven, npm, pypi, nuget, docker, rubygems, etc.):**
+
+          - **packageUrl + hash** - Hash REQUIRED to identify exact file content
+
+          - **pathname + hash** - Hash REQUIRED
+
+          - Providing packageUrl without hash for these formats will result in incorrect
+          identification
+
+
+          A maximum of 100 components can be evaluated in one request.'
         required: true
       responses:
         '200':
@@ -8199,6 +8530,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryComponentEvaluationResultList'
           description: The response contains the evaluation results.
+      tags:
+      - Firewall
+  /api/v2/firewall/connection/verify:
+    get:
+      description: 'Use this method to verify that the authenticated user has required
+        permissions for firewall operations and retrieve accessible applications.
+
+
+        Permissions required: Evaluate Individual Components'
+      operationId: verifyConnectionAndGetApplications
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationSummaryList'
+          description: Connection verified successfully. Returns list of applications
+            accessible to the user.
+        '401':
+          description: Authentication required. User is not authenticated.
+        '403':
+          description: User is authenticated but does not have 'Evaluate Individual
+            Components' permission.
       tags:
       - Firewall
   /api/v2/firewall/container-image/policyViolations/quarantined:
@@ -8734,6 +9088,111 @@ paths:
             requested.
       tags:
       - Firewall
+  /api/v2/githubApp/manifest:
+    post:
+      description: "Generate a GitHub App manifest for registration. Returns manifest\
+        \ JSON with a state token for CSRF protection. The state token is cryptographically\
+        \ secure, single-use, and expires after 10 minutes. Submit the manifest to\
+        \ GitHub's app creation flow, which will redirect back to IQ Server with the\
+        \ state token for validation. \n\n**Permissions Required:** Configure System\
+        \ Configuration and Users"
+      operationId: generateManifest
+      parameters:
+      - description: Owner (organization/application) ID
+        in: query
+        name: ownerId
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - description: GitHub organization name
+        in: query
+        name: organizationName
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Manifest generated successfully
+        '400':
+          description: Missing owner id or organization name
+        '500':
+          description: Base URL not configured or invalid request
+      summary: Generate GitHub App manifest
+      tags:
+      - GitHub App Configuration
+  /api/v2/githubApp/redirect:
+    get:
+      description: Handles redirect from GitHub after manifest submission. Exchanges
+        temporary code for permanent app credentials. The user's browser is automatically
+        redirected here by GitHub - not intended for direct use. **Permissions Required:**
+        Configure System Configuration and Users
+      operationId: handleRedirect
+      parameters:
+      - description: Temporary manifest conversion code from GitHub
+        in: query
+        name: code
+        required: true
+        schema:
+          type: string
+      - description: OAuth state token for CSRF protection
+        in: query
+        name: state
+        schema:
+          type: string
+      responses:
+        '303':
+          description: Successfully registered GitHub App, redirecting to settings
+            page
+        '400':
+          description: Invalid or expired code
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      summary: GitHub App registration redirect callback
+      tags:
+      - GitHub App Configuration
+  /api/v2/githubApp/setupInstallation:
+    get:
+      description: Process the redirect from GitHub after OAuth authorization, validate
+        state token, exchange OAuth code with PKCE verification, verify user ownership,
+        configure the installation for the specified organization/application, and
+        redirect to the configuration page
+      operationId: handleInstallationSetup
+      parameters:
+      - description: GitHub App installation ID
+        in: query
+        name: installation_id
+        required: true
+        schema:
+          format: int64
+          minimum: 1
+          type: integer
+      - description: State token for CSRF protection
+        in: query
+        name: state
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - description: OAuth authorization code
+        in: query
+        name: code
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        '302':
+          description: Redirect to source control configuration page
+        '400':
+          description: Invalid or missing parameters
+        '500':
+          description: Failed to configure GitHub App installation
+      summary: Handle GitHub App installation setup callback with OAuth + PKCE
+      tags:
+      - GitHub App Configuration
   /api/v2/labels/{ownerType}/{ownerId}:
     get:
       description: 'Use this method to retrieve the details for component labels for
@@ -9733,6 +10192,33 @@ paths:
                 $ref: '#/components/schemas/ApiOrganizationDTO'
           description: The response contains the assigned organization id and all
             other organization details specified.
+      tags:
+      - Organizations
+  /api/v2/organizations/byid:
+    get:
+      description: 'Use this method to retrieve organizations by their internal IDs.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getOrganizationsByIds
+      parameters:
+      - description: Enter the internal organization IDs.
+        in: query
+        name: id
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOrganizationListDTO'
+          description: The response contains a list of organizations. For each organization
+            the response contains organization id, organization name, and parent organization
+            id.
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}:
@@ -12076,7 +12562,9 @@ paths:
             \ and values \n11. resultIndex: indicating the relevance of the search\
             \ result w.r.t. the query"
         '409':
-          description: Search index does not exist or is unreadable.
+          description: Search index not found. The Advanced Search index is unavailable
+            or has not been created yet. Re-indexing is required before results can
+            be returned.
       tags:
       - Advanced Search
   /api/v2/search/advanced/export/csv:
@@ -13299,6 +13787,10 @@ tags:
   name: Auto Policy Waiver Exclusions
 - description: Use this REST API to create, modify and retrieve auto policy waivers.
   name: Auto Policy Waivers
+- description: Use this REST API to manage CI integration configuration. Configurations
+    can be set at organization or application level and are merged from the organization
+    hierarchy with lower levels taking precedence.
+  name: CI Configuration
 - description: 'Use this REST API to manage components that are developed in-house
     and are not open-source.
 
@@ -13395,6 +13887,9 @@ tags:
     metrics, repository management, quarantine operations, and namespace confusion
     prevention.
   name: Firewall
+- name: GitHub App
+- description: GitHub App configuration operations
+  name: GitHub App Configuration
 - description: Use this REST API to retrieve license legal metadata in raw or HTML
     format.
   name: License Legal Metadata Report

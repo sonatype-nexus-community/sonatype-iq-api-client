@@ -550,5 +550,11 @@ json_spec['paths']['/api/v2/userTokens/currentUser/createTime']['get']['response
     'type': 'string'
 }
 
+# v201 Updates
+# ------------------------------------------------------------------------
+print('Remove duplicate Tag `GitHub App`')
+json_spec['paths']['/api/v2/githubApp/manifest']['post']['tags'] = ['GitHub App Configuration']
+json_spec['paths']['/api/v2/githubApp/redirect']['get']['tags'] = ['GitHub App Configuration']
+
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
