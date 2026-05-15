@@ -12,6 +12,7 @@ concurrency:
 env:
     PYTHON_VERSION_DEFAULT: '3.12'
     IQ_SERVER_PORT: '8070'
+    IQ_SERVER_ADMIN_PORT: '8071'
 
 jobs:
     detect-and-update:
@@ -104,9 +105,9 @@ jobs:
             - name: Wait for Sonatype IQ Server to be ready
               if: steps.check.outputs.skip != 'true'
               run: |
-                  echo "Waiting for IQ Server on port ${{ env.IQ_SERVER_PORT }}..."
+                  echo "Waiting for IQ Server admin ping on port ${{ env.IQ_SERVER_ADMIN_PORT }}..."
                   for i in $(seq 1 36); do
-                      if curl -sf "http://localhost:${{ env.IQ_SERVER_PORT }}/" > /dev/null 2>&1; then
+                      if curl -sf "http://localhost:${{ env.IQ_SERVER_ADMIN_PORT }}/ping" > /dev/null 2>&1; then
                           echo "IQ Server is ready (after $((i * 5))s)"
                           exit 0
                       fi
