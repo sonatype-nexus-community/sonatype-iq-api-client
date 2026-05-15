@@ -42,7 +42,7 @@ jobs:
             - name: Get last processed version from git tags
               id: iq_current
               run: |
-                  TAG=$(git tag --list 'v1.*' | sort -V | tail -1)
+                  TAG=$(git tag --list 'v0.*' | sort -V | tail -1)
                   if [ -z "${TAG}" ]; then
                       echo "No existing tags found - treating current version as 0"
                       VERSION=0
@@ -80,7 +80,8 @@ jobs:
               run: |
                   IQ_VERSION=${{ steps.iq_latest.outputs.version }}
                   curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
-                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
+                  mkdir iq-server
+                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz" -C iq-server
 
             - name: Start Sonatype IQ Server
               if: steps.check.outputs.skip != 'true'
@@ -88,18 +89,8 @@ jobs:
               # accessible before the license gate. If this fails, inject the license
               # secret here and pass it via the appropriate startup flag.
               run: |
-                  IQ_DIR=$(find . -maxdepth 1 -name 'nexus-iq-server-*' -type d | head -1)
-                  IQ_JAR=$(find "${IQ_DIR}" -maxdepth 1 -name '*.jar' | head -1)
-                  IQ_CFG=$(find "${IQ_DIR}" -maxdepth 2 -name 'config.yml' | head -1)
-                  JAVA=$(find "${IQ_DIR}" -name 'java' -path '*/bin/java' | head -1)
-                  [ -z "${JAVA}" ] && JAVA=java
-
-                  echo "IQ Server dir:  ${IQ_DIR}"
-                  echo "IQ Server jar:  ${IQ_JAR}"
-                  echo "IQ Server cfg:  ${IQ_CFG}"
-                  echo "Java binary:    ${JAVA}"
-
-                  "${JAVA}" -jar "${IQ_JAR}" server "${IQ_CFG}" > /tmp/iq-server.log 2>&1 &
+                  chmod +x iq-server/sonatype-iq-server-x86_64
+                  iq-server/sonatype-iq-server-x86_64 > /tmp/iq-server.log 2>&1 &
                   echo $! > /tmp/iq-server.pid
 
             - name: Wait for Sonatype IQ Server to be ready
