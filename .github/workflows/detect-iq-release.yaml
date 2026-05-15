@@ -1,0 +1,196 @@
+name: Detect and Update IQ Server Spec
+
+on:
+    schedule:
+        - cron: '17 7 * * *'
+    workflow_dispatch:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    PYTHON_VERSION_DEFAULT: '3.12'
+    IQ_SERVER_PORT: '8070'
+
+jobs:
+    detect-and-update:
+        name: Detect New IQ Release and Update Spec
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              with:
+                  fetch-depth: 0
+
+            - name: Get latest IQ version from Sonatype release page
+              id: iq_latest
+              run: |
+                  VERSION=$(curl -s https://help.sonatype.com/en/download-and-compatibility.html \
+                    | python3 -c "
+                  import re, sys
+                  versions = re.findall(r'nexus-iq-server-1\.(\d+)\.0-01-bundle', sys.stdin.read())
+                  if not versions:
+                      raise SystemExit('ERROR: Could not detect latest IQ version from release page')
+                  print(max(versions, key=int))
+                  ")
+                  echo "Latest IQ Server version: ${VERSION}"
+                  echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+            - name: Get last processed version from git tags
+              id: iq_current
+              run: |
+                  TAG=$(git tag --list 'v1.*' | sort -V | tail -1)
+                  if [ -z "${TAG}" ]; then
+                      echo "No existing tags found - treating current version as 0"
+                      VERSION=0
+                  else
+                      VERSION=$(echo "${TAG}" | cut -d. -f2)
+                  fi
+                  echo "Current IQ Server version: ${VERSION}"
+                  echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+            - name: Check if update is needed
+              id: check
+              run: |
+                  LATEST=${{ steps.iq_latest.outputs.version }}
+                  CURRENT=${{ steps.iq_current.outputs.version }}
+                  if [ "${LATEST}" -le "${CURRENT}" ]; then
+                      echo "Already up to date - latest: ${LATEST}, current: ${CURRENT}"
+                      echo "skip=true" >> $GITHUB_OUTPUT
+                  else
+                      echo "New IQ version available: ${LATEST} (was ${CURRENT})"
+                  fi
+
+            - name: Notify Slack - new version detected
+              if: steps.check.outputs.skip != 'true'
+              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              with:
+                  webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      {
+                        "text": ":rocket: New Sonatype IQ Server v${{ steps.iq_latest.outputs.version }} detected - generating updated OpenAPI spec...\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+                      }
+
+            - name: Download Sonatype IQ Server bundle
+              if: steps.check.outputs.skip != 'true'
+              run: |
+                  IQ_VERSION=${{ steps.iq_latest.outputs.version }}
+                  curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
+                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
+
+            - name: Start Sonatype IQ Server
+              if: steps.check.outputs.skip != 'true'
+              # Attempting to start without a license - /api/v2/endpoints/public may be
+              # accessible before the license gate. If this fails, inject the license
+              # secret here and pass it via the appropriate startup flag.
+              run: |
+                  IQ_DIR=$(find . -maxdepth 1 -name 'nexus-iq-server-*' -type d | head -1)
+                  IQ_JAR=$(find "${IQ_DIR}" -maxdepth 1 -name '*.jar' | head -1)
+                  IQ_CFG=$(find "${IQ_DIR}" -maxdepth 2 -name 'config.yml' | head -1)
+                  JAVA=$(find "${IQ_DIR}" -name 'java' -path '*/bin/java' | head -1)
+                  [ -z "${JAVA}" ] && JAVA=java
+
+                  echo "IQ Server dir:  ${IQ_DIR}"
+                  echo "IQ Server jar:  ${IQ_JAR}"
+                  echo "IQ Server cfg:  ${IQ_CFG}"
+                  echo "Java binary:    ${JAVA}"
+
+                  "${JAVA}" -jar "${IQ_JAR}" server "${IQ_CFG}" > /tmp/iq-server.log 2>&1 &
+                  echo $! > /tmp/iq-server.pid
+
+            - name: Wait for Sonatype IQ Server to be ready
+              if: steps.check.outputs.skip != 'true'
+              run: |
+                  echo "Waiting for IQ Server on port ${{ env.IQ_SERVER_PORT }}..."
+                  for i in $(seq 1 36); do
+                      if curl -sf "http://localhost:${{ env.IQ_SERVER_PORT }}/" > /dev/null 2>&1; then
+                          echo "IQ Server is ready (after $((i * 5))s)"
+                          exit 0
+                      fi
+                      echo "  waiting... attempt ${i}/36"
+                      sleep 5
+                  done
+                  echo "ERROR: IQ Server did not become ready within 3 minutes"
+                  echo "--- IQ Server log ---"
+                  cat /tmp/iq-server.log
+                  exit 1
+
+            - name: Set up Python
+              if: steps.check.outputs.skip != 'true'
+              uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+              with:
+                  python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
+
+            - name: Install Python dependencies
+              if: steps.check.outputs.skip != 'true'
+              run: pip install requests pyyaml
+
+            - name: Run update-spec.py
+              if: steps.check.outputs.skip != 'true'
+              run: |
+                  python update-spec.py \
+                      "http://localhost:${{ env.IQ_SERVER_PORT }}" \
+                      "${{ steps.iq_latest.outputs.version }}"
+
+            - name: Create branch and commit updated spec
+              if: steps.check.outputs.skip != 'true'
+              run: |
+                  git config --global user.name "GitHub Actions"
+                  git config --global user.email "<>"
+                  git checkout -b "feat/iq-${{ steps.iq_latest.outputs.version }}"
+                  git add spec/openapi.yaml
+                  git commit -m "feat: Generated Spec from IQ ${{ steps.iq_latest.outputs.version }}"
+                  git push origin "feat/iq-${{ steps.iq_latest.outputs.version }}"
+
+            - name: Open PR
+              if: steps.check.outputs.skip != 'true'
+              id: pr
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  cat > /tmp/pr-body.md << 'PREOF'
+                  ## Automated Sonatype IQ Server Spec Update
+
+                  This PR was generated automatically by the `detect-iq-release` workflow.
+
+                  | | |
+                  |---|---|
+                  | **Sonatype IQ Server version** | ${{ steps.iq_latest.outputs.version }} |
+                  | **Workflow run** | [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+
+                  ### Before merging
+
+                  - [ ] Review `spec/openapi.yaml` diff for unexpected changes
+                  - [ ] Confirm all CI checks pass below
+                  PREOF
+
+                  URL=$(gh pr create \
+                      --title "feat: Generated Spec from IQ ${{ steps.iq_latest.outputs.version }}" \
+                      --body-file /tmp/pr-body.md \
+                      --base main)
+                  echo "url=${URL}" >> $GITHUB_OUTPUT
+
+            - name: Notify Slack - PR created
+              if: steps.check.outputs.skip != 'true'
+              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              with:
+                  webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      {
+                        "text": ":white_check_mark: PR ready for Sonatype IQ Server v${{ steps.iq_latest.outputs.version }}: ${{ steps.pr.outputs.url }}"
+                      }
+
+            - name: Notify Slack - workflow failure
+              if: failure()
+              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              with:
+                  webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
+                  webhook-type: incoming-webhook
+                  payload: |
+                      {
+                        "text": ":x: Sonatype IQ Server spec auto-update FAILED for v${{ steps.iq_latest.outputs.version }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View run>"
+                      }
