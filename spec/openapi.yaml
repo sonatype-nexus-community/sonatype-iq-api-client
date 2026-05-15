@@ -9,6 +9,15 @@ components:
         targetType:
           type: string
       type: object
+    ApiApplicableMembershipMappingsDTO:
+      properties:
+        groupSearchEnabled:
+          type: boolean
+        membersByRole:
+          items:
+            $ref: '#/components/schemas/ApiRoleWithMembersByOwnerDTO'
+          type: array
+      type: object
     ApiApplicationBaseDTO:
       properties:
         contactUserName:
@@ -357,6 +366,54 @@ components:
             type: string
           type: array
       type: object
+    ApiCiConfigurationDto:
+      properties:
+        advancedProperties:
+          items:
+            type: string
+          type: array
+        download:
+          $ref: '#/components/schemas/DownloadConfig'
+        enableDebugLogging:
+          type: boolean
+        failBuildOnNetworkError:
+          type: boolean
+        failBuildOnPolicyWarnings:
+          type: boolean
+        failBuildOnReachabilityErrors:
+          type: boolean
+        failBuildOnScanningErrors:
+          type: boolean
+        moduleExcludes:
+          items:
+            type: string
+          type: array
+        parameterPriority:
+          type: string
+        proxy:
+          $ref: '#/components/schemas/ProxyConfig'
+        reachability:
+          $ref: '#/components/schemas/ReachabilityConfig'
+        resultFile:
+          type: string
+        sarifFile:
+          type: string
+        scanPatterns:
+          items:
+            type: string
+          type: array
+        unstableBuildOnPolicyWarnings:
+          type: boolean
+      type: object
+    ApiCiConfigurationResponseDto:
+      properties:
+        data:
+          $ref: '#/components/schemas/ApiCiConfigurationDto'
+        source:
+          additionalProperties:
+            type: string
+          type: object
+      type: object
     ApiComponentChangeActionDTO:
       properties:
         component:
@@ -603,6 +660,8 @@ components:
       type: object
     ApiCompositeSourceControlDTO:
       properties:
+        authenticationType:
+          $ref: '#/components/schemas/ApiCompositeValueDTOString'
         baseBranch:
           $ref: '#/components/schemas/ApiCompositeValueDTOString'
         closePrAfterDays:
@@ -613,6 +672,8 @@ components:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
         commitStatusEnabled:
           $ref: '#/components/schemas/ApiCompositeValueDTOBoolean'
+        githubApp:
+          $ref: '#/components/schemas/ApiCompositeValueDTOGitHubAppInfo'
         id:
           type: string
         innerSourceAutomatedUpdatesEnabled:
@@ -650,6 +711,15 @@ components:
           type: boolean
         value:
           type: boolean
+      type: object
+    ApiCompositeValueDTOGitHubAppInfo:
+      properties:
+        parentName:
+          type: string
+        parentValue:
+          $ref: '#/components/schemas/GitHubAppInfo'
+        value:
+          $ref: '#/components/schemas/GitHubAppInfo'
       type: object
     ApiCompositeValueDTOInteger:
       properties:
@@ -1434,6 +1504,35 @@ components:
         userOrGroupName:
           type: string
       type: object
+    ApiMemberWithDetailsDTO:
+      properties:
+        displayName:
+          type: string
+        email:
+          type: string
+        internalName:
+          type: string
+        realm:
+          type: string
+        type:
+          enum:
+          - USER
+          - GROUP
+          type: string
+      type: object
+    ApiMembersByOwnerDTO:
+      properties:
+        members:
+          items:
+            $ref: '#/components/schemas/ApiMemberWithDetailsDTO'
+          type: array
+        ownerId:
+          type: string
+        ownerName:
+          type: string
+        ownerType:
+          type: string
+      type: object
     ApiMetricsReportingAggregationDTOV2:
       properties:
         discoveredCounts:
@@ -1596,6 +1695,46 @@ components:
           description: Total number of items
           format: int64
           type: integer
+      type: object
+    ApiPermissionCategoryDTO:
+      properties:
+        displayName:
+          type: string
+        permissions:
+          items:
+            $ref: '#/components/schemas/ApiPermissionDTO'
+          type: array
+      type: object
+    ApiPermissionDTO:
+      properties:
+        allowed:
+          type: boolean
+        description:
+          type: string
+        displayName:
+          type: string
+        id:
+          enum:
+          - CONFIGURE_SYSTEM
+          - EDIT_ROLES
+          - VIEW_ROLES
+          - ACCESS_AUDIT_LOG
+          - WAIVE_POLICY_VIOLATIONS
+          - CHANGE_LICENSES
+          - CHANGE_SECURITY_VULNERABILITIES
+          - MANAGE_PROPRIETARY
+          - CLAIM_COMPONENT
+          - WRITE
+          - READ
+          - EDIT_ACCESS_CONTROL
+          - EVALUATE_APPLICATION
+          - EVALUATE_COMPONENT
+          - ADD_APPLICATION
+          - MANAGE_AUTOMATIC_APPLICATION_CREATION
+          - MANAGE_AUTOMATIC_SCM_CONFIGURATION
+          - LEGAL_REVIEWER
+          - CREATE_PULL_REQUESTS
+          type: string
       type: object
     ApiPolicyDTO:
       properties:
@@ -2432,12 +2571,18 @@ components:
       type: object
     ApiRoleDTO:
       properties:
+        builtIn:
+          type: boolean
         description:
           type: string
         id:
           type: string
         name:
           type: string
+        permissionCategories:
+          items:
+            $ref: '#/components/schemas/ApiPermissionCategoryDTO'
+          type: array
       type: object
     ApiRoleListDTO:
       properties:
@@ -2461,6 +2606,19 @@ components:
           items:
             $ref: '#/components/schemas/ApiRoleMemberMappingDTO'
           type: array
+      type: object
+    ApiRoleWithMembersByOwnerDTO:
+      properties:
+        membersByOwner:
+          items:
+            $ref: '#/components/schemas/ApiMembersByOwnerDTO'
+          type: array
+        roleDescription:
+          type: string
+        roleId:
+          type: string
+        roleName:
+          type: string
       type: object
     ApiSamlConfigurationDTO:
       description: Enter the SAML configuration<ul><li>`identityProviderName` the
@@ -2680,6 +2838,8 @@ components:
       type: object
     ApiSourceControlDTO:
       properties:
+        authenticationType:
+          type: string
         baseBranch:
           type: string
         closePrAfterDays:
@@ -2963,13 +3123,20 @@ components:
             $ref: '#/components/schemas/ApiUserDTO'
           type: array
       type: object
+    ApiUserTokenConfigurationDTO:
+      properties:
+        userTokenDefaultExpirationDays:
+          format: int32
+          type: integer
+      type: object
     ApiUserTokenDTO:
       properties:
         createTime:
+          type: string
+        expirationDate:
           format: date-time
           type: string
         lastAccessTime:
-          format: date-time
           type: string
         passCode:
           type: string
@@ -3122,6 +3289,22 @@ components:
         applicationCategoriesByOwner:
           items:
             $ref: '#/components/schemas/TagsByOwnerDTO'
+          type: array
+      type: object
+    ApplicationSummary:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        publicId:
+          type: string
+      type: object
+    ApplicationSummaryList:
+      properties:
+        applicationSummaries:
+          items:
+            $ref: '#/components/schemas/ApplicationSummary'
           type: array
       type: object
     ApplicationTag:
@@ -3433,11 +3616,32 @@ components:
         scanIdFromLatestBuildStageEvaluation:
           type: string
       type: object
+    DownloadConfig:
+      properties:
+        iqCliUrl:
+          type: string
+        iqCliVersion:
+          type: string
+      type: object
     EpssData:
       properties:
         currentScore:
           format: double
           type: number
+    GitHubAppInfo:
+      properties:
+        accountName:
+          type: string
+        configurationDate:
+          type: string
+        id:
+          type: string
+        installationId:
+          format: int64
+          type: integer
+        name:
+          type: string
+      type: object
     GroupingByDTO:
       properties:
         additionalInfo:
@@ -3491,6 +3695,34 @@ components:
         ownerApplicationId:
           type: string
         ownerApplicationName:
+          type: string
+      type: object
+    JavaAnalysisConfig:
+      properties:
+        enabled:
+          type: boolean
+        entrypointStrategy:
+          type: string
+        namespaces:
+          items:
+            type: string
+          type: array
+      type: object
+    JavaScriptAnalysisConfig:
+      properties:
+        enabled:
+          type: boolean
+        jsExcludes:
+          items:
+            type: string
+          type: array
+        jsSources:
+          items:
+            type: string
+          type: array
+        nodeJsExecutable:
+          type: string
+        projectRoot:
           type: string
       type: object
     KevData:
@@ -3633,6 +3865,46 @@ components:
           items:
             $ref: '#/components/schemas/ValidationWarning'
           type: array
+      type: object
+    OAuth2ConfigurationDTO:
+      properties:
+        emailClaim:
+          type: string
+        exactMatchClaimsJson:
+          type: string
+        firstNameClaim:
+          type: string
+        groupsClaim:
+          type: string
+        idpIssuer:
+          type: string
+        idpJwks:
+          type: string
+        idpJwksUrl:
+          type: string
+        idpJwsAlgorithm:
+          type: string
+        lastNameClaim:
+          type: string
+        usernameClaim:
+          type: string
+      type: object
+    OidcConfigurationDTO:
+      properties:
+        authorizationCustomParamsJson:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        idpAuthorizationUrl:
+          type: string
+        idpIssuer:
+          type: string
+        idpTokenUrl:
+          type: string
+        tokenRequestCustomParamsJson:
+          type: string
       type: object
     PolicyAlert:
       properties:
@@ -3839,6 +4111,20 @@ components:
           type: integer
         waiverExpirationDetails:
           type: string
+      type: object
+    ProxyConfig:
+      properties:
+        host:
+          type: string
+      type: object
+    ReachabilityConfig:
+      properties:
+        failOnError:
+          type: boolean
+        javaAnalysis:
+          $ref: '#/components/schemas/JavaAnalysisConfig'
+        javaScriptAnalysis:
+          $ref: '#/components/schemas/JavaScriptAnalysisConfig'
       type: object
     ReferenceLink:
       properties:
@@ -4195,6 +4481,13 @@ components:
         cweSource:
           type: string
       type: object
+    SsoConfigurationDTO:
+      properties:
+        oauth2Configuration:
+          $ref: '#/components/schemas/OAuth2ConfigurationDTO'
+        oidcConfiguration:
+          $ref: '#/components/schemas/OidcConfigurationDTO'
+      type: object
     StageData:
       properties:
         actionTypeId:
@@ -4330,9 +4623,13 @@ components:
     BasicAuth:
       scheme: basic
       type: http
+    BearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.197.0-01
+  version: 1.201.0-02
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -5651,6 +5948,99 @@ paths:
           description: Component Claim for this hash does not exist.
       tags:
       - Claim Components
+  /api/v2/componentSearch/cveAffectedComponents:
+    get:
+      description: 'Retrieve paginated list of applications containing components
+        affected by one or more CVEs. Multiple CVE IDs can be specified using multiple
+        cveId query parameters (e.g., ?cveId=CVE-2025-1&cveId=CVE-2025-2). Default
+        page number is 1, default page size is 10. Results can be sorted by any column.
+        Default sorting (when sortBy is not specified): applicationName (asc), then
+        componentName (asc), then cveId (asc). When sortBy is explicitly specified,
+        only single-field sorting is applied with the specified sortOrder (default:
+        asc). <p>Permissions Required: View IQ Elements'
+      operationId: getCveAffectedComponents
+      parameters:
+      - description: CVE identifier(s). Can be specified multiple times for multiple
+          CVEs.
+        example: CVE-2025-55182
+        in: query
+        name: cveId
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      - description: 'Page number (1-indexed, minimum: 1, default: 1)'
+        in: query
+        name: pageNumber
+        schema:
+          default: 1
+          format: int32
+          minimum: 1
+          type: integer
+      - description: 'Number of items per page (1-1000, default: 10)'
+        in: query
+        name: pageSize
+        schema:
+          default: 10
+          format: int32
+          maximum: 1000
+          minimum: 1
+          type: integer
+      - description: 'Sort field: applicationName, applicationId, componentName, evaluationDate,
+          stage, activeWaiver, violating, cveId. When not specified, sorts by applicationName
+          (asc), then componentName (asc), then cveId (asc)'
+        in: query
+        name: sortBy
+        schema:
+          enum:
+          - APPLICATION_NAME
+          - COMPONENT_NAME
+          - EVALUATION_DATE
+          - STAGE
+          - APPLICATION_ID
+          - ACTIVE_WAIVER
+          - VIOLATING
+          - CVE_ID
+          type: string
+      - description: 'Sort order: asc or desc, default: asc'
+        in: query
+        name: sortOrder
+        schema:
+          default: asc
+          type: string
+      responses:
+        '200':
+          description: Paginated list of affected applications and components
+      tags:
+      - Component Search
+  /api/v2/componentSearch/downloadComponentSearchReport:
+    get:
+      description: 'Export component search results as CSV (streaming). Identifies
+        applications containing components affected by one or more CVEs. Multiple
+        CVE IDs can be specified using multiple cveId query parameters (e.g., ?cveId=CVE-2025-1&cveId=CVE-2025-2).
+        If no CVE ID is specified, defaults to CVE-2025-55182 (React2Shell) for backwards
+        compatibility. Results are streamed to avoid memory issues with large datasets.
+        Keep-alive mechanism prevents ALB timeouts during long-running queries. <p>Permissions
+        Required: View IQ Elements'
+      operationId: exportComponentSearchReport
+      parameters:
+      - description: CVE identifier(s). Can be specified multiple times for multiple
+          CVEs. Defaults to CVE-2025-55182 if not specified.
+        example: CVE-2025-55182
+        in: query
+        name: cveId
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      responses:
+        '200':
+          description: CSV file containing the component search results
+      tags:
+      - Component Search
   /api/v2/components/details:
     post:
       description: Use this method to retrieve data related to a component.
@@ -5936,7 +6326,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration
+      operationId: deleteConfiguration_1
       parameters:
       - description: Enter the names of the system properties. Values provided for
           name are case-sensitive.
@@ -5960,7 +6350,7 @@ paths:
 
         Permissions required: Edit System Configuration and Users or system property
         dependent'
-      operationId: getConfiguration
+      operationId: getConfiguration_1
       parameters:
       - description: Enter the names of the system properties. Values provided for
           name are case-sensitive.
@@ -5986,7 +6376,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration
+      operationId: setConfiguration_1
       requestBody:
         content:
           application/json:
@@ -6322,6 +6712,146 @@ paths:
             status of the connection.
       tags:
       - Configure Artifactory Connection
+  /api/v2/config/ci/{ownerType}/{ownerId}:
+    delete:
+      description: 'Use this method to delete CI integration configuration for the
+        specified owner.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: deleteConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: CI configuration was deleted successfully.
+        '404':
+          description: CI configuration not found for the specified owner.
+      tags:
+      - CI Configuration
+    get:
+      description: 'Use this method to retrieve CI integration configuration for the
+        specified owner.
+
+
+        Set the `direct` query parameter to `true` to retrieve only the configuration
+        directly associated with the specified owner. Set it to `false` (default)
+        to retrieve the merged configuration from the organization hierarchy, where
+        configurations from parent organizations are combined with lower levels taking
+        precedence.
+
+
+        The response includes a `source` map that indicates which owner (organization
+        or application) contributed each configuration field when using merged mode.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - description: Set to true to retrieve only direct configuration, false (default)
+          to retrieve merged configuration from hierarchy
+        in: query
+        name: direct
+        schema:
+          default: false
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCiConfigurationResponseDto'
+          description: 'The response contains:
+
+            <ul>
+
+            <li>`configuration` - the CI integration configuration as a JSON object</li>
+
+            <li>`source` - a map of field names to owner IDs indicating provenance
+            (empty for direct queries)</li>
+
+            </ul>'
+        '404':
+          description: No CI configuration found for the specified owner or its hierarchy.
+      tags:
+      - CI Configuration
+    put:
+      description: 'Use this method to create or update CI integration configuration
+        for the specified owner.
+
+
+        The configuration is stored as a JSON object to support various CI systems
+        (GitHub Actions, GitLab CI, etc.). String values must be non-empty.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: setConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiCiConfigurationDto'
+        description: Provide the CI integration configuration as a JSON object. The
+          structure supports different CI systems.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiCiConfigurationDto'
+          description: CI configuration was saved successfully.
+        '400':
+          description: Invalid configuration provided (e.g., empty strings).
+      tags:
+      - CI Configuration
   /api/v2/config/crowd:
     delete:
       description: 'Use this method to remove an existing Atlassian Crowd Configuration.
@@ -6445,7 +6975,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_3
+      operationId: deleteConfiguration_4
       responses:
         '204':
           description: HTTP proxy server configuration deleted successfully.
@@ -6458,7 +6988,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_3
+      operationId: getConfiguration_4
       responses:
         '200':
           content:
@@ -6482,7 +7012,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_3
+      operationId: setConfiguration_4
       requestBody:
         content:
           application/json:
@@ -6531,7 +7061,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_1
+      operationId: deleteConfiguration_2
       responses:
         '204':
           description: Jira configuration deleted.
@@ -6542,7 +7072,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_1
+      operationId: getConfiguration_2
       responses:
         '200':
           content:
@@ -6564,7 +7094,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_1
+      operationId: setConfiguration_2
       requestBody:
         content:
           application/json:
@@ -6582,7 +7112,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_2
+      operationId: deleteConfiguration_3
       responses:
         '204':
           description: SMTP configuration was removed successfully.
@@ -6595,7 +7125,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_2
+      operationId: getConfiguration_3
       responses:
         '200':
           content:
@@ -6623,7 +7153,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_2
+      operationId: setConfiguration_3
       requestBody:
         content:
           application/json:
@@ -6687,13 +7217,64 @@ paths:
           description: Missing or invalid values provided.
       tags:
       - Config Mail
+  /api/v2/config/oidc:
+    delete:
+      description: 'Use this method to delete the OIDC configuration.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: deleteOidcConfiguration
+      responses:
+        '404':
+          description: OIDC is not configured.
+      tags:
+      - Config OIDC
+    get:
+      description: 'Use this method to retrieve the OIDC configuration.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: getOidcConfiguration
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SsoConfigurationDTO'
+          description: "The response contains:\n - `oidcConfiguration` field that\
+            \ contains all the oidc configuration data \n - `oAuth2Configuration`\
+            \ field that contains the OAuth2 configuration required for oidc"
+        '404':
+          description: OIDC is not configured.
+      tags:
+      - Config OIDC
+    put:
+      description: 'Use this method to enable SSO using OpenID Connect (OIDC). This
+        request uses the content type application/json to transmit the configuration
+        to IQ Server.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: insertOrUpdateOidcConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SsoConfigurationDTO'
+      responses:
+        '204':
+          description: Configuration successful.
+        '400':
+          description: Invalid configuration.
+      tags:
+      - Config OIDC
   /api/v2/config/reverseProxyAuthentication:
     delete:
       description: 'Use this method to remove an existing reverse proxy server configuration.
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_4
+      operationId: deleteConfiguration_5
       responses:
         '204':
           description: Reverse proxy server configuration deleted successfully.
@@ -6704,7 +7285,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_4
+      operationId: getConfiguration_5
       responses:
         '200':
           content:
@@ -6727,7 +7308,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_4
+      operationId: setConfiguration_5
       requestBody:
         content:
           application/json:
@@ -6818,9 +7399,6 @@ paths:
                   type: string
                 samlConfiguration:
                   $ref: '#/components/schemas/ApiSamlConfigurationDTO'
-              required:
-              - identityProviderXml
-              - samlConfiguration
               type: object
       responses:
         '204':
@@ -6855,7 +7433,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_5
+      operationId: deleteConfiguration_6
       responses:
         '204':
           description: SCM configuration deleted successfully.
@@ -6866,7 +7444,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_5
+      operationId: getConfiguration_6
       responses:
         '200':
           content:
@@ -6906,7 +7484,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_5
+      operationId: setConfiguration_6
       requestBody:
         content:
           application/json:
@@ -6940,13 +7518,91 @@ paths:
           description: SCM configuration successfully updated.
       tags:
       - Config Source Control
+  /api/v2/config/userTokens:
+    delete:
+      description: 'Use this method to reset user token configuration properties to
+        system defaults. Returns the current configuration after reset.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: resetConfiguration
+      parameters:
+      - in: query
+        name: property
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Configuration reset successfully
+        '400':
+          description: No properties specified or invalid properties
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
+    get:
+      description: 'Use this method to retrieve user token configuration.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: getConfiguration_7
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Current user token configuration
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
+    put:
+      description: 'Use this method to update user token configuration. Null values
+        are ignored (no change). Returns the current configuration after applying
+        changes.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: updateConfiguration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiUserTokenConfigurationDTO'
+          description: Configuration updated successfully
+        '400':
+          description: Invalid configuration values
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      tags:
+      - User Token Configuration
   /api/v2/config/zscaler:
     delete:
       description: 'Use this method to disable or remove the Zscaler configuration.
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_6
+      operationId: deleteConfiguration_7
       responses:
         '204':
           description: Zscaler configuration was removed successfully.
@@ -6959,7 +7615,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_6
+      operationId: getConfiguration_8
       responses:
         '200':
           content:
@@ -6981,7 +7637,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: setConfiguration_6
+      operationId: setConfiguration_7
       requestBody:
         content:
           application/json:
@@ -7794,6 +8450,32 @@ paths:
       description: 'Use this method to evaluate components (max. 100).
 
 
+        **Hash Requirements by Format Type:**
+
+
+        **Coordinate-Based Formats** (hash NOT required when using packageUrl):
+
+        - golang, conan, cargo, cocoapods, cran, conda, composer, hf-model
+
+        - These formats identify components by coordinates (name+version) rather than
+        file hash
+
+        - When using packageUrl, hash is optional
+
+        - If hash is provided, it will be used
+
+
+        **Hash-Based Formats** (hash REQUIRED):
+
+        - maven, npm, pypi, nuget, docker, rubygems, and others
+
+        - Hash must ALWAYS be provided to identify the exact file content
+
+        - Hash is required regardless of whether pathname or packageUrl is used
+
+        - Missing hash for these formats will result in incorrect component identification
+
+
         Permissions required: Evaluate Individual Components'
       operationId: evaluateComponents_1
       parameters:
@@ -7814,9 +8496,32 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ApiRepositoryComponentEvaluationRequestList'
-        description: Provide the array of the component identifiers to be evaluated,
-          using the component hash and the (packageUrl or pathname). A maximum of
-          100 components can be evaluated in one request.
+        description: 'Provide the array of component identifiers to be evaluated.
+          Each component requires **one of the following combinations**:
+
+
+          **For Coordinate-Based Formats (golang, conan, cargo, cocoapods, cran, conda,
+          composer, hf-model):**
+
+          - **packageUrl only** - Hash is optional
+
+          - **packageUrl + hash** - Hash is optional, will be used if provided
+
+          - **pathname + hash** - Hash required (pathname approach always requires
+          hash)
+
+
+          **For Hash-Based Formats (maven, npm, pypi, nuget, docker, rubygems, etc.):**
+
+          - **packageUrl + hash** - Hash REQUIRED to identify exact file content
+
+          - **pathname + hash** - Hash REQUIRED
+
+          - Providing packageUrl without hash for these formats will result in incorrect
+          identification
+
+
+          A maximum of 100 components can be evaluated in one request.'
         required: true
       responses:
         '200':
@@ -7825,6 +8530,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiRepositoryComponentEvaluationResultList'
           description: The response contains the evaluation results.
+      tags:
+      - Firewall
+  /api/v2/firewall/connection/verify:
+    get:
+      description: 'Use this method to verify that the authenticated user has required
+        permissions for firewall operations and retrieve accessible applications.
+
+
+        Permissions required: Evaluate Individual Components'
+      operationId: verifyConnectionAndGetApplications
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationSummaryList'
+          description: Connection verified successfully. Returns list of applications
+            accessible to the user.
+        '401':
+          description: Authentication required. User is not authenticated.
+        '403':
+          description: User is authenticated but does not have 'Evaluate Individual
+            Components' permission.
       tags:
       - Firewall
   /api/v2/firewall/container-image/policyViolations/quarantined:
@@ -8360,6 +9088,111 @@ paths:
             requested.
       tags:
       - Firewall
+  /api/v2/githubApp/manifest:
+    post:
+      description: "Generate a GitHub App manifest for registration. Returns manifest\
+        \ JSON with a state token for CSRF protection. The state token is cryptographically\
+        \ secure, single-use, and expires after 10 minutes. Submit the manifest to\
+        \ GitHub's app creation flow, which will redirect back to IQ Server with the\
+        \ state token for validation. \n\n**Permissions Required:** Configure System\
+        \ Configuration and Users"
+      operationId: generateManifest
+      parameters:
+      - description: Owner (organization/application) ID
+        in: query
+        name: ownerId
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - description: GitHub organization name
+        in: query
+        name: organizationName
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Manifest generated successfully
+        '400':
+          description: Missing owner id or organization name
+        '500':
+          description: Base URL not configured or invalid request
+      summary: Generate GitHub App manifest
+      tags:
+      - GitHub App Configuration
+  /api/v2/githubApp/redirect:
+    get:
+      description: Handles redirect from GitHub after manifest submission. Exchanges
+        temporary code for permanent app credentials. The user's browser is automatically
+        redirected here by GitHub - not intended for direct use. **Permissions Required:**
+        Configure System Configuration and Users
+      operationId: handleRedirect
+      parameters:
+      - description: Temporary manifest conversion code from GitHub
+        in: query
+        name: code
+        required: true
+        schema:
+          type: string
+      - description: OAuth state token for CSRF protection
+        in: query
+        name: state
+        schema:
+          type: string
+      responses:
+        '303':
+          description: Successfully registered GitHub App, redirecting to settings
+            page
+        '400':
+          description: Invalid or expired code
+        '401':
+          description: Authentication required
+        '403':
+          description: Insufficient permissions
+      summary: GitHub App registration redirect callback
+      tags:
+      - GitHub App Configuration
+  /api/v2/githubApp/setupInstallation:
+    get:
+      description: Process the redirect from GitHub after OAuth authorization, validate
+        state token, exchange OAuth code with PKCE verification, verify user ownership,
+        configure the installation for the specified organization/application, and
+        redirect to the configuration page
+      operationId: handleInstallationSetup
+      parameters:
+      - description: GitHub App installation ID
+        in: query
+        name: installation_id
+        required: true
+        schema:
+          format: int64
+          minimum: 1
+          type: integer
+      - description: State token for CSRF protection
+        in: query
+        name: state
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      - description: OAuth authorization code
+        in: query
+        name: code
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        '302':
+          description: Redirect to source control configuration page
+        '400':
+          description: Invalid or missing parameters
+        '500':
+          description: Failed to configure GitHub App installation
+      summary: Handle GitHub App installation setup callback with OAuth + PKCE
+      tags:
+      - GitHub App Configuration
   /api/v2/labels/{ownerType}/{ownerId}:
     get:
       description: 'Use this method to retrieve the details for component labels for
@@ -9359,6 +10192,33 @@ paths:
                 $ref: '#/components/schemas/ApiOrganizationDTO'
           description: The response contains the assigned organization id and all
             other organization details specified.
+      tags:
+      - Organizations
+  /api/v2/organizations/byid:
+    get:
+      description: 'Use this method to retrieve organizations by their internal IDs.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getOrganizationsByIds
+      parameters:
+      - description: Enter the internal organization IDs.
+        in: query
+        name: id
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiOrganizationListDTO'
+          description: The response contains a list of organizations. For each organization
+            the response contains organization id, organization name, and parent organization
+            id.
       tags:
       - Organizations
   /api/v2/organizations/{organizationId}:
@@ -10982,6 +11842,52 @@ paths:
             members who inherit a role based on the organization hierarchy.
       tags:
       - Role Memberships
+  /api/v2/roleMemberships/{ownerType}/role/{roleId}/members:
+    put:
+      description: 'Use this method to set all members for a specific role in the
+        global or repository container context. This operation atomically replaces
+        all existing members for the role with the provided list.
+
+
+        Permissions required: Edit system configuration and users for a global context
+        or edit access control for a non-global context'
+      operationId: setBulkRoleMembersGlobalOrRepositoryContainer
+      parameters:
+      - description: Enter the ownerType.
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - repository_container
+          - global
+          pattern: global|repository_container
+          type: string
+      - description: 'Enter the roleId for the role whose members should be set.
+
+
+          Use the Roles REST API for roleIds and descriptions.'
+        in: path
+        name: roleId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/ApiMemberWithDetailsDTO'
+              type: array
+        description: List of members to assign to this role. Provide an empty list
+          to remove all members.
+        required: true
+      responses:
+        '204':
+          description: The role membership has been successfully updated with the
+            provided members.
+      tags:
+      - Role Memberships
   /api/v2/roleMemberships/{ownerType}/role/{roleId}/{memberType}/{memberName}:
     delete:
       description: 'Use this method to revoke roles globally or on all repositories.
@@ -11082,6 +11988,37 @@ paths:
             on the given context.
       tags:
       - Role Memberships
+  /api/v2/roleMemberships/{ownerType}/roles:
+    get:
+      description: 'Use this method to retrieve all role memberships for global or
+        repository container context with full details including role names, descriptions,
+        and member information.
+
+
+        Permissions required: Edit system configuration and users for a global context
+        or view IQ elements for a non-global context'
+      operationId: getBulkRoleMembershipsGlobalOrRepositoryContainer
+      parameters:
+      - description: Enter the value for ownerType.
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - repository_container
+          - global
+          pattern: global|repository_container
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiApplicableMembershipMappingsDTO'
+          description: The response contains all roles with their members. Also includes
+            a flag indicating whether group search is enabled.
+      tags:
+      - Role Memberships
   /api/v2/roleMemberships/{ownerType}/{internalOwnerId}:
     get:
       description: 'Use this method to retrieve the users, user groups and the corresponding
@@ -11118,6 +12055,60 @@ paths:
           description: The response contains the assigned role Ids, users and user
             groups for the application or organization requested. It also includes
             members who inherit a role based on the organization hierarchy.
+      tags:
+      - Role Memberships
+  /api/v2/roleMemberships/{ownerType}/{internalOwnerId}/role/{roleId}/members:
+    put:
+      description: 'Use this method to set all members for a specific role. This operation
+        atomically replaces all existing members for the role with the provided list.
+
+
+        Permissions required: Edit access control'
+      operationId: setBulkRoleMembersNonGlobal
+      parameters:
+      - description: Enter the ownerType for which you want to set role members.
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          - repository_manager
+          - repository
+          pattern: application|organization|repository_manager|repository
+          type: string
+      - description: Enter the id associated with the ownerType specified above. For
+          applications, use the public ID. For organizations, repositories, and repository
+          managers, use the internal ID.
+        in: path
+        name: internalOwnerId
+        required: true
+        schema:
+          type: string
+      - description: 'Enter the roleId for the role whose members should be set.
+
+
+          Use the Roles REST API for roleIds and descriptions.'
+        in: path
+        name: roleId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/ApiMemberWithDetailsDTO'
+              type: array
+        description: List of members to assign to this role. Provide an empty list
+          to remove all members.
+        required: true
+      responses:
+        '204':
+          description: The role membership has been successfully updated with the
+            provided members.
       tags:
       - Role Memberships
   /api/v2/roleMemberships/{ownerType}/{internalOwnerId}/role/{roleId}/{memberType}/{memberName}:
@@ -11227,10 +12218,63 @@ paths:
         required: true
         schema:
           type: string
+      - description: 'If true, attempts to validate if the specified user or group
+          exists before assigning the role.
+
+          If false or omitted, the request behaves as before (no validation check).'
+        in: query
+        name: validateMember
+        schema:
+          default: false
+          type: boolean
       responses:
         '204':
           description: The specified roleId has been has been granted to the user
             or user group for the requested context.
+      tags:
+      - Role Memberships
+  /api/v2/roleMemberships/{ownerType}/{internalOwnerId}/roles:
+    get:
+      description: 'Use this method to retrieve all role memberships with full details
+        including role names, descriptions, and member information organized by owner
+        (for inheritance display).
+
+
+        Permissions required: Edit system configuration and users for a global context
+        or view IQ elements for a non-global context'
+      operationId: getBulkRoleMembershipsNonGlobal
+      parameters:
+      - description: Enter the ownerType for which you want to retrieve role memberships.
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          - repository_manager
+          - repository
+          pattern: application|organization|repository_manager|repository
+          type: string
+      - description: Enter the corresponding id for the ownerType specified above.
+          For applications, use the public ID. For organizations, repositories, and
+          repository managers, use the internal ID.
+        in: path
+        name: internalOwnerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiApplicableMembershipMappingsDTO'
+          description: 'The response contains all roles with their members organized
+            by owner, including inherited members from parent organizations or repository
+            hierarchies. Also includes a flag indicating whether group search is
+
+            enabled.'
       tags:
       - Role Memberships
   /api/v2/roles:
@@ -11247,6 +12291,111 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiRoleListDTO'
           description: The response contains the role IDs, role names and descriptions.
+      tags:
+      - Roles
+    post:
+      description: 'Use this method to create a new custom role with specified permissions.
+
+
+        Permissions required: Edit Roles'
+      operationId: addRole
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiRoleDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRoleDTO'
+          description: The role was created successfully. The response contains the
+            created role details.
+      tags:
+      - Roles
+  /api/v2/roles/new:
+    get:
+      description: 'Use this method to retrieve a template for creating a new custom
+        role, including all available permissions that can be assigned.
+
+
+        Permissions required: Edit Roles'
+      operationId: getTemplateForNewRole
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRoleDTO'
+          description: The response contains a role template with available permissions.
+      tags:
+      - Roles
+  /api/v2/roles/{roleId}:
+    delete:
+      description: 'Use this method to delete a custom role.
+
+
+        Permissions required: Edit Roles'
+      operationId: deleteRole
+      parameters:
+      - in: path
+        name: roleId
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: The role was deleted successfully.
+      tags:
+      - Roles
+    get:
+      description: 'Use this method to retrieve details for a specific role, including
+        its permissions.
+
+
+        Permissions required: View All Roles'
+      operationId: getRoleById
+      parameters:
+      - in: path
+        name: roleId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRoleDTO'
+          description: The response contains the role details including permissions.
+      tags:
+      - Roles
+    put:
+      description: 'Use this method to update an existing custom role and its permissions.
+
+
+        Permissions required: Edit Roles'
+      operationId: updateRole
+      parameters:
+      - in: path
+        name: roleId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiRoleDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRoleDTO'
+          description: The role was updated successfully. The response contains the
+            updated role details.
       tags:
       - Roles
   /api/v2/scan/applications/{applicationId}/sources/{source}:
@@ -11413,7 +12562,9 @@ paths:
             \ and values \n11. resultIndex: indicating the relevance of the search\
             \ result w.r.t. the query"
         '409':
-          description: Search index does not exist or is unreadable.
+          description: Search index not found. The Advanced Search index is unavailable
+            or has not been created yet. Re-indexing is required before results can
+            be returned.
       tags:
       - Advanced Search
   /api/v2/search/advanced/export/csv:
@@ -12155,6 +13306,25 @@ paths:
             `userCode`, `username` `passCode`, and the IQ Server `realm`.
       tags:
       - User Tokens
+  /api/v2/userTokens/currentUser/createTime:
+    get:
+      description: 'Use this method to retrieve the creation time of the user token
+        for the currently logged in user.
+
+
+        Permissions required: None'
+      operationId: getCurrentUserTokenCreateTime
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: string
+          description: The response contains the token creation time in ISO format.
+        '404':
+          description: User token does not exist for the current user.
+      tags:
+      - User Tokens
   /api/v2/userTokens/currentUser/hasToken:
     get:
       description: 'Use this method to check if a user token has been issued to the
@@ -12428,6 +13598,7 @@ paths:
             as code injection, authentication flaws and data leakage.</li><li>UNSHADER
             means the vulnerability is discovered by the Shaded Vulnerability Algorithm.</li>
             </ul></li></ul>
+      security: []
       tags:
       - Vulnerability Details
   /api/v2/vulnerabilities/{refId}:
@@ -12531,6 +13702,7 @@ paths:
             as code injection, authentication flaws and data leakage.</li><li>UNSHADER
             means the vulnerability is discovered by the Shaded Vulnerability Algorithm.</li>
             </ul></li></ul>
+      security: []
       tags:
       - Vulnerability Details
   /api/v2/{ownerType}/{internalOwnerId}/configuration/publicSource/cpe:
@@ -12592,6 +13764,7 @@ paths:
       - CPE Matching Configuration
 security:
 - BasicAuth: []
+  BearerAuth: []
 tags:
 - description: Use the Advanced Search REST API to perform searches on Lifecycle application
     scan reports.
@@ -12614,6 +13787,10 @@ tags:
   name: Auto Policy Waiver Exclusions
 - description: Use this REST API to create, modify and retrieve auto policy waivers.
   name: Auto Policy Waivers
+- description: Use this REST API to manage CI integration configuration. Configurations
+    can be set at organization or application level and are merged from the organization
+    hierarchy with lower levels taking precedence.
+  name: CI Configuration
 - description: 'Use this REST API to manage components that are developed in-house
     and are not open-source.
 
@@ -12665,6 +13842,8 @@ tags:
 - description: Use this REST API to manage the configuration of an SMTP server, to
     receive email notifications.
   name: Config Mail
+- description: Use this REST API to manage the OIDC configuration for IQ Server.
+  name: Config OIDC
 - description: Use this REST API to manage the configuration of IQ Server with an
     existing HTTP proxy server.
   name: Config Proxy Server
@@ -12708,6 +13887,9 @@ tags:
     metrics, repository management, quarantine operations, and namespace confusion
     prevention.
   name: Firewall
+- name: GitHub App
+- description: GitHub App configuration operations
+  name: GitHub App Configuration
 - description: Use this REST API to retrieve license legal metadata in raw or HTML
     format.
   name: License Legal Metadata Report
@@ -12756,7 +13938,7 @@ tags:
     on organizations, applications and repositories.'
   name: Role Memberships
 - description: 'Roles provide sets of permissions that grant access to the functionality
-    in the user interface,through integrations, and when using REST APIs.
+    in the user interface, through integrations, and when using REST APIs.
 
 
     Permissions are granted by assigning users or groups to the system roles or at
@@ -12764,7 +13946,7 @@ tags:
     managers, and applications and organizations.
 
 
-    Use this REST API to retrieve role IDs, role names and descriptions.'
+    Use this REST API to manage roles.'
   name: Roles
 - description: Use this REST API to retrieve security vulnerabilities that have been
     overridden.
@@ -12781,6 +13963,8 @@ tags:
   name: SPDX
 - description: Use this REST API to scan SBOMs for your applications.
   name: Third-Party Analysis
+- description: Use this REST API to manage user token expiration configuration.
+  name: User Token Configuration
 - description: Use this REST API to manage user tokens.
   name: User Tokens
 - description: Use this REST API to manage users.

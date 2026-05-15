@@ -536,7 +536,25 @@ json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['mult
     'description': '''Enter the SAML metadata XML of your IdP. Refer to the IdP documentation to obtain this metadata.''',
     'type': 'string',
 }
+del json_spec['paths']['/api/v2/config/saml']['put']['requestBody']['content']['multipart/form-data']['schema']['required']
 
+# Remove `date-time` format for various fields relating to User Token APIs
+print('Patching schema: ApiUserTokenDTO...')
+json_spec['components']['schemas']['ApiUserTokenDTO']['properties']['createTime'] = {
+    'type': 'string'
+}
+json_spec['components']['schemas']['ApiUserTokenDTO']['properties']['lastAccessTime'] = {
+    'type': 'string'
+}
+json_spec['paths']['/api/v2/userTokens/currentUser/createTime']['get']['responses']['200']['content']['application/json']['schema'] = {
+    'type': 'string'
+}
+
+# v201 Updates
+# ------------------------------------------------------------------------
+print('Remove duplicate Tag `GitHub App`')
+json_spec['paths']['/api/v2/githubApp/manifest']['post']['tags'] = ['GitHub App Configuration']
+json_spec['paths']['/api/v2/githubApp/redirect']['get']['tags'] = ['GitHub App Configuration']
 
 with open('./spec/openapi.yaml', 'w') as output_yaml_specfile:
     output_yaml_specfile.write(yaml_dump(json_spec))
