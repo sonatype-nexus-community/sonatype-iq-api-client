@@ -78,10 +78,12 @@ jobs:
             - name: Download Sonatype IQ Server bundle
               if: steps.check.outputs.skip != 'true'
               run: |
+                  echo "${{ secrets.NXIQ_LICENSE }}" | base64 -d > ${{ github.workspace }}/license.lic
                   IQ_VERSION=${{ steps.iq_latest.outputs.version }}
                   curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
                   mkdir ${{ github.workspace }}/nxiq
                   tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz" -C ${{ github.workspace }}/nxiq
+                  echo "licenseFile: ${{ github.workspace }}/license.lic" >> nxiq/config.yml
 
             - name: Start Sonatype IQ Server
               if: steps.check.outputs.skip != 'true'
