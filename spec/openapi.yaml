@@ -3750,6 +3750,17 @@ components:
           - parentOrganizationName
           - parentOrganizationId
           - sbomSpecification
+          - policyViolationId
+          - policyViolationThreatCategory
+          - policyViolationThreatLevel
+          - policyViolationPolicyName
+          - policyViolationPolicyId
+          - policyViolationWaiverStatus
+          - policyViolationConstraintName
+          - componentEffectiveLicenseId
+          - componentEffectiveLicenseName
+          - componentLicenseThreatGroupName
+          - componentLicenseThreatLevel
           type: string
         searchResultItemDTOS:
           items:
@@ -4296,6 +4307,10 @@ components:
           type: string
         applicationVersion:
           type: string
+        componentEffectiveLicenseId:
+          type: string
+        componentEffectiveLicenseName:
+          type: string
         componentHash:
           type: string
         componentIdentifier:
@@ -4308,6 +4323,11 @@ components:
           type: string
         componentLabelName:
           type: string
+        componentLicenseThreatGroupName:
+          type: string
+        componentLicenseThreatLevel:
+          format: int32
+          type: integer
         componentName:
           type: string
         itemType:
@@ -4327,6 +4347,21 @@ components:
         policyThreatLevel:
           format: int32
           type: integer
+        policyViolationConstraintName:
+          type: string
+        policyViolationId:
+          type: string
+        policyViolationPolicyId:
+          type: string
+        policyViolationPolicyName:
+          type: string
+        policyViolationThreatCategory:
+          type: string
+        policyViolationThreatLevel:
+          format: int32
+          type: integer
+        policyViolationWaiverStatus:
+          type: string
         reportId:
           type: string
         resultIndex:
@@ -4697,7 +4732,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.203.0-01
+  version: 1.203.2-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
