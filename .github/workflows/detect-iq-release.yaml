@@ -31,7 +31,7 @@ jobs:
                   VERSION=$(curl -s https://help.sonatype.com/en/download-and-compatibility.html \
                     | python3 -c "
                   import re, sys
-                  versions = re.findall(r'nexus-iq-server-1\.(\d+)\.0-01-bundle', sys.stdin.read())
+                  versions = re.findall(r'nexus-iq-server-1\.(\d+)\.\d+-\d+-bundle', sys.stdin.read())
                   if not versions:
                       raise SystemExit('ERROR: Could not detect latest IQ version from release page')
                   print(max(versions, key=int))
