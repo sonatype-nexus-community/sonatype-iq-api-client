@@ -31,10 +31,10 @@ jobs:
                   VERSION=$(curl -s https://help.sonatype.com/en/download-and-compatibility.html \
                     | python3 -c "
                   import re, sys
-                  versions = re.findall(r'nexus-iq-server-1\.(\d+)\.\d+-\d+-bundle', sys.stdin.read())
+                  versions = re.findall(r'nexus-iq-server-1\.(\d+\.\d+)-\d+-bundle', sys.stdin.read())
                   if not versions:
                       raise SystemExit('ERROR: Could not detect latest IQ version from release page')
-                  print(max(versions, key=int))
+                  print(max(versions, key=lambda v: tuple(int(x) for x in v.split('.'))))
                   ")
                   echo "Latest IQ Server version: ${VERSION}"
                   echo "version=${VERSION}" >> $GITHUB_OUTPUT
@@ -44,10 +44,10 @@ jobs:
               run: |
                   TAG=$(git tag --list 'v0.*' | sort -V | tail -1)
                   if [ -z "${TAG}" ]; then
-                      echo "No existing tags found - treating current version as 0"
-                      VERSION=0
+                      echo "No existing tags found - treating current version as 0.0"
+                      VERSION=0.0
                   else
-                      VERSION=$(echo "${TAG}" | cut -d. -f2)
+                      VERSION=$(echo "${TAG}" | cut -d. -f2-3)
                   fi
                   echo "Current IQ Server version: ${VERSION}"
                   echo "version=${VERSION}" >> $GITHUB_OUTPUT
@@ -57,7 +57,8 @@ jobs:
               run: |
                   LATEST=${{ steps.iq_latest.outputs.version }}
                   CURRENT=${{ steps.iq_current.outputs.version }}
-                  if [ "${LATEST}" -le "${CURRENT}" ]; then
+                  HIGHEST=$(printf '%s\n%s\n' "${CURRENT}" "${LATEST}" | sort -V | tail -1)
+                  if [ "${HIGHEST}" = "${CURRENT}" ]; then
                       echo "Already up to date - latest: ${LATEST}, current: ${CURRENT}"
                       echo "skip=true" >> $GITHUB_OUTPUT
                   else
@@ -80,9 +81,9 @@ jobs:
               run: |
                   echo "${{ secrets.NXIQ_LICENSE }}" | base64 -d > ${{ github.workspace }}/license.lic
                   IQ_VERSION=${{ steps.iq_latest.outputs.version }}
-                  curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
+                  curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}-01-bundle.tar.gz"
                   mkdir ${{ github.workspace }}/nxiq
-                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz" -C ${{ github.workspace }}/nxiq
+                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}-01-bundle.tar.gz" -C ${{ github.workspace }}/nxiq
                   echo "licenseFile: ${{ github.workspace }}/license.lic" >> nxiq/config.yml
 
             - name: Start Sonatype IQ Server
