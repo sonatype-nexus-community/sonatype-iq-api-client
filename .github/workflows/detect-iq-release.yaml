@@ -78,10 +78,12 @@ jobs:
             - name: Download Sonatype IQ Server bundle
               if: steps.check.outputs.skip != 'true'
               run: |
+                  echo "${{ secrets.NXIQ_LICENSE }}" | base64 -d > ${{ github.workspace }}/license.lic
                   IQ_VERSION=${{ steps.iq_latest.outputs.version }}
                   curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz"
-                  mkdir iq-server
-                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz" -C iq-server
+                  mkdir ${{ github.workspace }}/nxiq
+                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}.0-01-bundle.tar.gz" -C ${{ github.workspace }}/nxiq
+                  echo "licenseFile: ${{ github.workspace }}/license.lic" >> nxiq/config.yml
 
             - name: Start Sonatype IQ Server
               if: steps.check.outputs.skip != 'true'
@@ -89,9 +91,16 @@ jobs:
               # accessible before the license gate. If this fails, inject the license
               # secret here and pass it via the appropriate startup flag.
               run: |
-                  chmod +x iq-server/sonatype-iq-server-x86_64
-                  iq-server/sonatype-iq-server-x86_64 > /tmp/iq-server.log 2>&1 &
-                  echo $! > /tmp/iq-server.pid
+                  java \
+                    --add-opens=java.base/java.lang=ALL-UNNAMED \
+                    --add-opens=java.base/java.util=ALL-UNNAMED \
+                    --add-opens=java.base/java.security=ALL-UNNAMED \
+                    --add-opens=java.base/sun.security.rsa=ALL-UNNAMED \
+                    --add-opens=java.base/sun.security.x509=ALL-UNNAMED \
+                    --add-opens=java.base/sun.security.util=ALL-UNNAMED \
+                    --add-opens=java.xml/com.sun.org.apache.xerces.internal.jaxp.datatype=ALL-UNNAMED \
+                    -jar nexus-iq-server-*.jar server config.yml 2> stderr.log &
+              working-directory: "${{ github.workspace }}/nxiq"
 
             - name: Wait for Sonatype IQ Server to be ready
               if: steps.check.outputs.skip != 'true'
@@ -141,7 +150,7 @@ jobs:
               if: steps.check.outputs.skip != 'true'
               id: pr
               env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GH_TOKEN: ${{ secrets.GH_PAT }}
               run: |
                   cat > /tmp/pr-body.md << 'PREOF'
                   ## Automated Sonatype IQ Server Spec Update
