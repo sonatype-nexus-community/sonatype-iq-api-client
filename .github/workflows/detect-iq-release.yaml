@@ -28,12 +28,17 @@ jobs:
             - name: Get latest IQ version from Sonatype release page
               id: iq_latest
               run: |
-                  VERSION=$(curl -s https://help.sonatype.com/en/download-and-compatibility.html \
+                  VERSION=$(curl -sf https://help.sonatype.com/en/download-and-compatibility.html \
                     | python3 -c "
                   import re, sys
-                  versions = re.findall(r'nexus-iq-server-1\.(\d+\.\d+)-\d+-bundle', sys.stdin.read())
+                  content = sys.stdin.read()
+                  # Current format: platform-specific bundled-JDK archives
+                  versions = re.findall(r'nexus-iq-server-1\.(\d+(?:\.\d+)+)-\d+-linux', content)
+                  # Fallback: legacy bundle format
                   if not versions:
-                      raise SystemExit('ERROR: Could not detect latest IQ version from release page')
+                      versions = re.findall(r'nexus-iq-server-1\.(\d+(?:\.\d+)+)-\d+-bundle', content)
+                  if not versions:
+                      raise SystemExit('ERROR: Could not detect IQ version - no download URLs matched on release page')
                   print(max(versions, key=lambda v: tuple(int(x) for x in v.split('.'))))
                   ")
                   echo "Latest IQ Server version: ${VERSION}"
@@ -81,27 +86,25 @@ jobs:
               run: |
                   echo "${{ secrets.NXIQ_LICENSE }}" | base64 -d > ${{ github.workspace }}/license.lic
                   IQ_VERSION=${{ steps.iq_latest.outputs.version }}
-                  curl -fLO "https://download.sonatype.com/clm/server/nexus-iq-server-1.${IQ_VERSION}-01-bundle.tar.gz"
-                  mkdir ${{ github.workspace }}/nxiq
-                  tar -xzf "nexus-iq-server-1.${IQ_VERSION}-01-bundle.tar.gz" -C ${{ github.workspace }}/nxiq
-                  echo "licenseFile: ${{ github.workspace }}/license.lic" >> nxiq/config.yml
+                  ARCHIVE="nexus-iq-server-1.${IQ_VERSION}-01-linux-x86_64.tgz"
+                  curl -fLO "https://download.sonatype.com/clm/server/${ARCHIVE}"
+                  mkdir -p ${{ github.workspace }}/nxiq
+                  tar -xzf "${ARCHIVE}" -C ${{ github.workspace }}/nxiq
+                  NXIQ_DIR=$(find ${{ github.workspace }}/nxiq -maxdepth 1 -mindepth 1 -type d -name 'nexus-iq-server-*' | head -1)
+                  if [ -z "${NXIQ_DIR}" ]; then
+                      echo "ERROR: Could not find extracted IQ Server directory"
+                      ls -la ${{ github.workspace }}/nxiq/
+                      exit 1
+                  fi
+                  echo "licenseFile: ${{ github.workspace }}/license.lic" >> "${NXIQ_DIR}/config.yml"
+                  echo "NXIQ_DIR=${NXIQ_DIR}" >> $GITHUB_ENV
 
             - name: Start Sonatype IQ Server
               if: steps.check.outputs.skip != 'true'
-              # Attempting to start without a license - /api/v2/endpoints/public may be
-              # accessible before the license gate. If this fails, inject the license
-              # secret here and pass it via the appropriate startup flag.
               run: |
-                  java \
-                    --add-opens=java.base/java.lang=ALL-UNNAMED \
-                    --add-opens=java.base/java.util=ALL-UNNAMED \
-                    --add-opens=java.base/java.security=ALL-UNNAMED \
-                    --add-opens=java.base/sun.security.rsa=ALL-UNNAMED \
-                    --add-opens=java.base/sun.security.x509=ALL-UNNAMED \
-                    --add-opens=java.base/sun.security.util=ALL-UNNAMED \
-                    --add-opens=java.xml/com.sun.org.apache.xerces.internal.jaxp.datatype=ALL-UNNAMED \
-                    -jar nexus-iq-server-*.jar server config.yml 2> stderr.log &
-              working-directory: "${{ github.workspace }}/nxiq"
+                  "${NXIQ_DIR}/bin/nexus-iq-server" server "${NXIQ_DIR}/config.yml" \
+                    > "${{ github.workspace }}/nxiq/stdout.log" \
+                    2> "${{ github.workspace }}/nxiq/stderr.log" &
 
             - name: Wait for Sonatype IQ Server to be ready
               if: steps.check.outputs.skip != 'true'
@@ -116,8 +119,10 @@ jobs:
                       sleep 5
                   done
                   echo "ERROR: IQ Server did not become ready within 3 minutes"
-                  echo "--- IQ Server log ---"
-                  cat /tmp/iq-server.log
+                  echo "--- IQ Server stderr ---"
+                  cat "${{ github.workspace }}/nxiq/stderr.log" 2>/dev/null || echo "(no stderr log)"
+                  echo "--- IQ Server stdout ---"
+                  cat "${{ github.workspace }}/nxiq/stdout.log" 2>/dev/null || echo "(no stdout log)"
                   exit 1
 
             - name: Set up Python
