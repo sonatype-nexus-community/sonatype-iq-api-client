@@ -5,3 +5,5 @@ gitRepoId: nexus-iq-api-client-go
 additionalProperties:
   goImportAlias: sonatypeiq
   packageName: sonatypeiq
+openapiNormalizer:
+    KEEP_ONLY_FIRST_TAG_IN_OPERATION: "true"

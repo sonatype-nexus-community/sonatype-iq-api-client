@@ -1763,6 +1763,7 @@ components:
           - EDIT_ROLES
           - VIEW_ROLES
           - ACCESS_AUDIT_LOG
+          - VIEW_USAGE
           - WAIVE_POLICY_VIOLATIONS
           - CHANGE_LICENSES
           - CHANGE_SECURITY_VULNERABILITIES
@@ -2527,6 +2528,8 @@ components:
           type: boolean
         format:
           type: string
+        monitoringEnabled:
+          type: boolean
         namespaceConfusionProtectionEnabled:
           type: boolean
         policyCompliantComponentSelectionEnabled:
@@ -2797,6 +2800,8 @@ components:
       properties:
         analysis:
           $ref: '#/components/schemas/ApiSecurityIssueAnalysisDTO'
+        customData:
+          $ref: '#/components/schemas/SecurityVulnerabilityCustomDataDTO'
         cvssVector:
           type: string
         cvssVectorSource:
@@ -2901,8 +2906,6 @@ components:
           type: boolean
         enableStatusChecks:
           type: boolean
-        githubAppId:
-          type: string
         id:
           type: string
         innerSourceAutomatedUpdatesEnabled:
@@ -3560,6 +3563,18 @@ components:
         packageUrl:
           type: string
       type: object
+    Condition:
+      properties:
+        conditionIndex:
+          format: int32
+          type: integer
+        conditionTypeId:
+          type: string
+        operator:
+          type: string
+        value:
+          type: string
+      type: object
     ConditionFact:
       properties:
         conditionIndex:
@@ -3588,6 +3603,22 @@ components:
           $ref: '#/components/schemas/ValidationResult'
         tokenPermissions:
           $ref: '#/components/schemas/ValidationResult'
+      type: object
+    Constraint:
+      properties:
+        conditions:
+          items:
+            $ref: '#/components/schemas/Condition'
+          type: array
+        id:
+          type: string
+        name:
+          type: string
+        operator:
+          enum:
+          - AND
+          - OR
+          type: string
       type: object
     ConstraintFact:
       properties:
@@ -3804,10 +3835,55 @@ components:
         projectRoot:
           type: string
       type: object
+    JiraNotification:
+      properties:
+        issueTypeId:
+          format: int64
+          type: integer
+        projectKey:
+          type: string
+        stageIds:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      type: object
     KevData:
       properties:
         isKev:
           type: boolean
+      type: object
+    Label:
+      properties:
+        color:
+          enum:
+          - white
+          - grey
+          - black
+          - green
+          - yellow
+          - orange
+          - red
+          - blue
+          - light-red
+          - light-green
+          - light-blue
+          - light-purple
+          - dark-red
+          - dark-green
+          - dark-blue
+          - dark-purple
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        label:
+          type: string
+        labelLowercase:
+          type: string
+        ownerId:
+          type: string
       type: object
     LabelsByOwner:
       properties:
@@ -3895,6 +3971,20 @@ components:
           - global
           type: string
       type: object
+    LicenseThreatGroup:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameLowercaseNoWhitespace:
+          type: string
+        ownerId:
+          type: string
+        threatLevel:
+          format: int32
+          type: integer
+      type: object
     LicenseThreatGroupDTO:
       properties:
         name:
@@ -3902,6 +3992,17 @@ components:
         threatLevel:
           format: int32
           type: integer
+      type: object
+    LicenseThreatGroupLicense:
+      properties:
+        id:
+          type: string
+        licenseId:
+          type: string
+        licenseThreatGroupId:
+          type: string
+        ownerId:
+          type: string
       type: object
     MalwareCategory:
       properties:
@@ -3945,6 +4046,25 @@ components:
             $ref: '#/components/schemas/ValidationWarning'
           type: array
       type: object
+    Notifications:
+      properties:
+        jiraNotifications:
+          items:
+            $ref: '#/components/schemas/JiraNotification'
+          type: array
+        roleNotifications:
+          items:
+            $ref: '#/components/schemas/RoleNotification'
+          type: array
+        userNotifications:
+          items:
+            $ref: '#/components/schemas/UserNotification'
+          type: array
+        webhookNotifications:
+          items:
+            $ref: '#/components/schemas/WebhookNotification'
+          type: array
+      type: object
     OAuth2ConfigurationDTO:
       properties:
         emailClaim:
@@ -3984,6 +4104,47 @@ components:
           type: string
         tokenRequestCustomParamsJson:
           type: string
+      type: object
+    Policy:
+      properties:
+        actions:
+          additionalProperties:
+            type: string
+          type: object
+        constraints:
+          items:
+            $ref: '#/components/schemas/Constraint'
+          type: array
+        id:
+          type: string
+        legacyViolationAllowed:
+          type: boolean
+        name:
+          type: string
+        notifications:
+          $ref: '#/components/schemas/Notifications'
+        ownerId:
+          type: string
+        policyActionsOverrideAllowed:
+          type: boolean
+        policyActionsOverrides:
+          additionalProperties:
+            additionalProperties:
+              type: string
+            type: object
+          type: object
+        policyNotificationsOverrideAllowed:
+          type: boolean
+        policyNotificationsOverrides:
+          additionalProperties:
+            $ref: '#/components/schemas/Notifications'
+          type: object
+        policyViolationGrandfatheringAllowed:
+          type: boolean
+          writeOnly: true
+        threatLevel:
+          format: int32
+          type: integer
       type: object
     PolicyAlert:
       properties:
@@ -4095,6 +4256,33 @@ components:
         totalSastFindingCount:
           format: int32
           type: integer
+      type: object
+    PolicyExportResult:
+      properties:
+        labels:
+          items:
+            $ref: '#/components/schemas/Label'
+          type: array
+        licenseThreatGroupLicenses:
+          items:
+            $ref: '#/components/schemas/LicenseThreatGroupLicense'
+          type: array
+        licenseThreatGroups:
+          items:
+            $ref: '#/components/schemas/LicenseThreatGroup'
+          type: array
+        policies:
+          items:
+            $ref: '#/components/schemas/Policy'
+          type: array
+        policyTags:
+          items:
+            $ref: '#/components/schemas/PolicyTag'
+          type: array
+        tags:
+          items:
+            $ref: '#/components/schemas/Tag'
+          type: array
       type: object
     PolicyFact:
       properties:
@@ -4219,6 +4407,18 @@ components:
         url:
           type: string
       type: object
+    RoleNotification:
+      properties:
+        roleId:
+          type: string
+        roleName:
+          type: string
+        stageIds:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      type: object
     RootCause:
       properties:
         listOfPaths:
@@ -4264,6 +4464,11 @@ components:
           uniqueItems: true
         successfulMapping:
           $ref: '#/components/schemas/UserMapping'
+      type: object
+    ScanHealthConfigDTO:
+      properties:
+        failOnZeroComponents:
+          type: boolean
       type: object
     SearchResultDTO:
       properties:
@@ -4630,6 +4835,38 @@ components:
       - baseUrl
       - forceBaseUrl
       type: string
+    Tag:
+      properties:
+        color:
+          enum:
+          - white
+          - grey
+          - black
+          - green
+          - yellow
+          - orange
+          - red
+          - blue
+          - light-red
+          - light-green
+          - light-blue
+          - light-purple
+          - dark-red
+          - dark-green
+          - dark-blue
+          - dark-purple
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+        name:
+          type: string
+        nameLowercaseNoWhitespace:
+          type: string
+        organizationId:
+          type: string
+      type: object
     TagsByOwnerDTO:
       properties:
         applicationCategories:
@@ -4677,6 +4914,16 @@ components:
           - IQ_FULLNAME
           type: string
       type: object
+    UserNotification:
+      properties:
+        emailAddress:
+          type: string
+        stageIds:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+      type: object
     ValidationError:
       properties:
         message:
@@ -4722,6 +4969,16 @@ components:
         shortName:
           type: string
       type: object
+    WebhookNotification:
+      properties:
+        stageIds:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
+        webhookId:
+          type: string
+      type: object
   securitySchemes:
     BasicAuth:
       scheme: basic
@@ -4732,7 +4989,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.203.2-01
+  version: 1.204.0-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -5384,7 +5641,13 @@ paths:
       description: 'Use this method to retrieve the ''raw'' data generated as a result
         of an application evaluation. ''raw'' data includes: the components identified
         in the application, and the licenses and vulnerabilities associated with the
-        identified components./n/nPermissions required: View IQ Elements'
+        identified components. Optionally set `includeCustomSecurityVulnerabilityData=true`
+        to include any configured security vulnerability custom data (remediation,
+        cweId, cvssVector, cvssSeverity) for each securityIssue. NOT to be confused
+        with `SecurityVulnerabilityOverride` (hash-based violation-state override).
+
+
+        Permissions required: View IQ Elements'
       operationId: getRawData
       parameters:
       - description: 'Enter the applicationPublicId (assigned at the time of creating
@@ -5395,12 +5658,19 @@ paths:
         schema:
           type: string
       - description: Enter the reportId (scanId) created at the time of evaluating
-          the application. application.
+          the application.
         in: path
         name: scanId
         required: true
         schema:
           type: string
+      - description: Set to true to include security vulnerability custom data (remediation,
+          cweId, cvssVector, cvssSeverity) for each securityIssue. Defaults to false.
+        in: query
+        name: includeCustomSecurityVulnerabilityData
+        schema:
+          default: false
+          type: boolean
       responses:
         '200':
           content:
@@ -7530,13 +7800,139 @@ paths:
           description: SAML is not configured.
       tags:
       - Config SAML
+  /api/v2/config/scanHealth/{ownerType}/{ownerId}:
+    delete:
+      description: 'Use this method to delete Scan Health configuration for the specified
+        owner.
+
+        After deletion, the configuration will be inherited from the parent organization
+
+        or default to disabled.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: deleteConfiguration_6
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Scan Health configuration was deleted successfully.
+        '404':
+          description: Scan Health configuration not found for the specified owner.
+      tags:
+      - Scan Health Configuration
+    get:
+      description: 'Use this method to retrieve Scan Health configuration for the
+        specified owner.
+
+
+        The response includes the `failOnZeroComponents` setting. A null value indicates
+
+        the setting is inherited from the parent organization (or default disabled
+        if no
+
+        parent configuration exists).
+
+
+        Permissions required: View IQ Elements'
+      operationId: getConfiguration_6
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanHealthConfigDTO'
+          description: The Scan Health configuration for the specified owner.
+      tags:
+      - Scan Health Configuration
+    put:
+      description: 'Use this method to create or update Scan Health configuration
+        for the specified owner.
+
+
+        Set `failOnZeroComponents` to `true` to fail scans that detect zero components.
+
+        Set to `false` to explicitly disable this check. Set to `null` to inherit
+        from
+
+        the parent organization.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: saveConfiguration
+      parameters:
+      - description: The owner type (application or organization)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - description: The internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanHealthConfigDTO'
+        description: The Scan Health configuration to save.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanHealthConfigDTO'
+          description: Scan Health configuration was saved successfully.
+        '404':
+          description: Owner not found.
+      tags:
+      - Scan Health Configuration
   /api/v2/config/sourceControl:
     delete:
       description: 'Use this method to delete an existing SCM configuration.
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_6
+      operationId: deleteConfiguration_7
       responses:
         '204':
           description: SCM configuration deleted successfully.
@@ -7547,7 +7943,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_6
+      operationId: getConfiguration_7
       responses:
         '200':
           content:
@@ -7657,7 +8053,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_7
+      operationId: getConfiguration_8
       responses:
         '200':
           content:
@@ -7705,7 +8101,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: deleteConfiguration_7
+      operationId: deleteConfiguration_8
       responses:
         '204':
           description: Zscaler configuration was removed successfully.
@@ -7718,7 +8114,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getConfiguration_8
+      operationId: getConfiguration_9
       responses:
         '200':
           content:
@@ -7886,6 +8282,114 @@ paths:
           description: Successfully retrieved the Zscaler quota.
       tags:
       - Config Zscaler
+  /api/v2/consumption/daily-history:
+    get:
+      description: Daily history for last 30 days with cumulative totals, daily average,
+        peak day. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: getDailyHistory
+      responses:
+        '200':
+          description: Retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/export:
+    get:
+      description: Export 12-month history as CSV. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: exportCsv
+      responses:
+        '200':
+          description: CSV body
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/history:
+    get:
+      description: 12-month consumption history. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: getHistory
+      responses:
+        '200':
+          description: History retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/history/breakdown:
+    get:
+      description: Consumption history with per-activity breakdown; aggregation=daily|weekly|monthly.
+        Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: getHistoryBreakdown
+      parameters:
+      - in: query
+        name: aggregation
+        schema:
+          default: monthly
+          enum:
+          - DAILY
+          - WEEKLY
+          - MONTHLY
+          type: string
+      responses:
+        '200':
+          description: Breakdown retrieved
+        '400':
+          description: Invalid aggregation
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/history/by-source:
+    get:
+      description: 12-month consumption history grouped by source. Requires CONFIGURE_SYSTEM
+        or VIEW_USAGE.
+      operationId: getHistoryBySource
+      responses:
+        '200':
+          description: Retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/summary:
+    get:
+      description: Current billing window consumption summary with activity breakdown.
+        Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: getSummary
+      responses:
+        '200':
+          description: Summary retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/top-apps:
+    get:
+      description: Top consuming apps for current billing month. Requires CONFIGURE_SYSTEM
+        or VIEW_USAGE.
+      operationId: getTopApps
+      responses:
+        '200':
+          description: Retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
   /api/v2/cycloneDx/{cdxVersion}/{applicationId}/reports/{reportId}:
     get:
       description: 'Use this method to generate a CycloneDX SBOM for an application.<p>Permissions
@@ -9282,6 +9786,27 @@ paths:
             requested.
       tags:
       - Firewall
+  /api/v2/githubApp:
+    get:
+      description: "Returns all GitHub Apps directly registered at this owner level.\
+        \ Does not include inherited apps from parent organizations. \n\n**Permissions\
+        \ Required:** Configure System Configuration and Users"
+      operationId: listGitHubApps
+      parameters:
+      - description: Owner (organization/application) ID
+        in: query
+        name: ownerId
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        '200':
+          description: List of GitHub Apps
+      summary: List GitHub Apps for an owner
+      tags:
+      - GitHub App
+      - GitHub App Configuration
   /api/v2/githubApp/manifest:
     post:
       description: "Generate a GitHub App manifest for registration. Returns manifest\
@@ -9385,6 +9910,35 @@ paths:
           description: Failed to configure GitHub App installation
       summary: Handle GitHub App installation setup callback with OAuth + PKCE
       tags:
+      - GitHub App Configuration
+  /api/v2/githubApp/{githubAppId}:
+    delete:
+      description: "Deletes a specific GitHub App by its ID. Validates ownership before\
+        \ deletion. Best-effort cleanup of the GitHub installation via API. \n\n**Permissions\
+        \ Required:** Configure System Configuration and Users"
+      operationId: deleteGitHubApp
+      parameters:
+      - description: GitHub App ID
+        in: path
+        name: githubAppId
+        required: true
+        schema:
+          type: string
+      - description: Owner (organization/application) ID
+        in: query
+        name: ownerId
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        '204':
+          description: GitHub App deleted successfully
+        '404':
+          description: GitHub App not found for specified owner
+      summary: Delete a GitHub App
+      tags:
+      - GitHub App
       - GitHub App Configuration
   /api/v2/labels/{ownerType}/{ownerId}:
     get:
@@ -10526,6 +11080,83 @@ paths:
             or `Other`.</li>
       tags:
       - Policies
+  /api/v2/policy/{ownerType}/{ownerId}/export:
+    get:
+      description: 'Exports policy configurations including policy rules, conditions,
+        labels, license threat groups,
+
+        and tags for the specified owner (organization, application, or repository).
+
+        Use the `includeInherited` parameter to include policies from parent levels
+        in the hierarchy.
+
+
+        **Permissions required**: View IQ Elements (READ permission on the specified
+        owner)
+
+
+        **Export scope**:
+
+        - Policy rules and conditions
+
+        - Policy assignments (via ownerId on each policy)
+
+        - Component labels
+
+        - License threat groups
+
+        - Application categories (tags) for organizations
+
+
+        **Note**: Waivers are not included in the export.'
+      operationId: exportPolicies
+      parameters:
+      - description: Type of owner (organization, application, or repository)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          - repository
+          pattern: application|organization|repository
+          type: string
+      - description: Internal ID of the owner
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - description: 'If true, include policies from parent levels in the hierarchy.
+          For repositories, includes policies from the repository and parent organization
+          (RepositoryManager and RepositoryContainer levels are skipped as they do
+          not define policies). For applications, includes policies from the application
+          and parent organization(s). For organizations, includes policies from the
+          organization and any parent organizations. Default: false (direct policies
+          only)'
+        in: query
+        name: includeInherited
+        schema:
+          default: false
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyExportResult'
+          description: Policy configuration exported successfully. The response includes
+            policies, labels, license threat groups, and (for organizations) tags.
+            When includeInherited=true, policies from parent levels are included with
+            their original ownerId preserved.
+        '403':
+          description: User does not have READ permission on the specified owner
+        '404':
+          description: Organization, application, or repository not found
+      summary: Export policy configuration
+      tags:
+      - Policy Export
   /api/v2/policyViolations:
     get:
       description: 'Use this method to retrieve policy violation details for a policy/policies.
@@ -11961,6 +12592,43 @@ paths:
             for the component being released.</li><li>The quarantine and release times.</li><li>A
             list of policy violations that were waived to release the component from
             quarantine.</li><ul>
+      tags:
+      - Repositories
+  /api/v2/repositories/{repositoryManagerId}/{repositoryId}/components:
+    post:
+      operationId: uploadScan
+      parameters:
+      - in: path
+        name: repositoryManagerId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: repositoryId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                componentId:
+                  type: string
+                policyEvaluationStage:
+                  type: string
+                purl:
+                  type: string
+                scanFile:
+                  format: binary
+                  type: string
+              type: object
+      responses:
+        '200': &id002
+          content:
+            application/json: {}
+          description: default response
+        default: *id002
       tags:
       - Repositories
   /api/v2/repositories/{repositoryManagerInstanceId}/{repositoryPublicId}/components/quarantined/pathnames:
@@ -14058,6 +14726,7 @@ tags:
 - description: Use this REST API to manage the configuration of Firewall for JFrog
     Artifactory.
   name: Configure Artifactory Connection
+- name: Consumption
 - description: Use the CPE Matching Configuration REST API to add/set/remove cpe matching
     configuration to organizations and applications
   name: CPE Matching Configuration
@@ -14103,6 +14772,8 @@ tags:
     \ \n1. Requesting a policy evaluation (POST) \n2. Checking the status and response\
     \ of the evaluation request (GET)"
   name: Policy Evaluation
+- description: Export policy configurations for organizations, applications, and repositories
+  name: Policy Export
 - description: 'Use this REST API to obtain the violation details, violation details
     across stages (cross stage), violations occurring due to transitive dependencies
     and all waivers applicable to a violation.
@@ -14141,6 +14812,13 @@ tags:
 
     Use this REST API to manage roles.'
   name: Roles
+- description: 'Use this REST API to manage Scan Health configuration. This includes
+    settings for
+
+    failing scans with zero components detected. Configurations can be set at organization
+
+    or application level and are inherited from the organization hierarchy.'
+  name: Scan Health Configuration
 - description: Use this REST API to retrieve security vulnerabilities that have been
     overridden.
   name: Security Vulnerability Overrides
