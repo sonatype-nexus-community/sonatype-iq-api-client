@@ -4989,7 +4989,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.204.1-01
+  version: 1.204.2-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
