@@ -829,6 +829,18 @@ components:
         waiverReasonId:
           type: string
       type: object
+    ApiContainerImageWaiverRequestDTO:
+      properties:
+        comment:
+          type: string
+        expiryTime:
+          format: date-time
+          type: string
+        noteToReviewer:
+          type: string
+        waiverReasonId:
+          type: string
+      type: object
     ApiCrossStageViolationDTOV2:
       properties:
         applicationName:
@@ -1193,6 +1205,42 @@ components:
         ownerId:
           type: string
         ownerType:
+          type: string
+      type: object
+    ApiLegacyViolationChangeResponseDTO:
+      description: Response from a bulk legacy-violation mutation.
+      properties:
+        changedPolicyViolationCount:
+          description: Number of policy violations whose legacy status changed in
+            this call.
+          format: int32
+          type: integer
+      type: object
+    ApiLegacyViolationStatusDTO:
+      description: Legacy-violation status for an application or organization.
+      properties:
+        allowChange:
+          description: Whether the legacy status can be changed for this owner.
+          readOnly: true
+          type: boolean
+        allowOverride:
+          description: 'Whether children (orgs and apps) are allowed to override the
+            legacy status. Organization-only. Primitive boolean: an absent or null
+            value in the request body is treated as false.'
+          type: boolean
+        enabled:
+          description: Whether legacy violations are enabled. null means inherit from
+            the parent organization.
+          type: boolean
+        enabledInParent:
+          description: Whether legacy violations are enabled in the parent organization.
+            null when no parent set this value.
+          readOnly: true
+          type: boolean
+        inheritedFromOrganizationName:
+          description: The name of the organization the legacy status is inherited
+            from, or null if not inherited.
+          readOnly: true
           type: string
       type: object
     ApiLicenseDTO:
@@ -1944,6 +1992,15 @@ components:
           type: string
         isObsolete:
           type: boolean
+        lastRenewalComment:
+          type: string
+        lastRenewalReasonText:
+          type: string
+        lastRenewedAt:
+          format: date-time
+          type: string
+        lastRenewedBy:
+          type: string
         matcherStrategy:
           enum:
           - DEFAULT
@@ -2178,6 +2235,17 @@ components:
             $ref: '#/components/schemas/ApiPullRequestResult'
           type: array
       type: object
+    ApiReachabilityEvidenceResponse:
+      properties:
+        paths:
+          items:
+            $ref: '#/components/schemas/EvidencePath'
+          type: array
+        truncated:
+          type: boolean
+        vulnerabilityId:
+          type: string
+      type: object
     ApiReportComponentDTOV2:
       properties:
         aiModelData:
@@ -2296,10 +2364,22 @@ components:
           type: object
         initiator:
           type: string
+        page:
+          format: int32
+          type: integer
+        pageCount:
+          format: int64
+          type: integer
+        pageSize:
+          format: int32
+          type: integer
         reportTime:
           type: number
         reportTitle:
           type: string
+        total:
+          format: int64
+          type: integer
       type: object
     ApiReportPolicyViolationDTOV2:
       properties:
@@ -2534,6 +2614,8 @@ components:
           type: boolean
         policyCompliantComponentSelectionEnabled:
           type: boolean
+        proxyUrl:
+          type: string
         publicId:
           type: string
         quarantineEnabled:
@@ -2541,6 +2623,8 @@ components:
         repositoryId:
           type: string
         type:
+          type: string
+        upstreamUrl:
           type: string
       type: object
     ApiRepositoryListDTO:
@@ -2555,6 +2639,10 @@ components:
         id:
           type: string
         instanceId:
+          type: string
+        managerType:
+          enum:
+          - virtual
           type: string
         name:
           type: string
@@ -2821,6 +2909,10 @@ components:
           type: string
         url:
           type: string
+        vulnIds:
+          items:
+            type: string
+          type: array
       type: object
     ApiSecurityVulnerabilityOverrideDTOV2:
       properties:
@@ -3256,6 +3348,26 @@ components:
         waiveTime:
           format: date-time
           type: string
+      type: object
+    ApiWaiverExpirationNotificationConfigDTO:
+      properties:
+        directEmails:
+          items:
+            type: string
+          type: array
+        inheritConfig:
+          type: boolean
+        notificationDays:
+          items:
+            format: int32
+            type: integer
+          type: array
+        recipientType:
+          type: string
+        roleIds:
+          items:
+            type: string
+          type: array
       type: object
     ApiWaiverOptionsDTO:
       description: Options for creating policy waivers
@@ -3713,6 +3825,19 @@ components:
         scanIdFromLatestBuildStageEvaluation:
           type: string
       type: object
+    DotNetAnalysisConfig:
+      properties:
+        dotnetPath:
+          type: string
+        enabled:
+          type: boolean
+        entrypointStrategy:
+          type: string
+        namespaces:
+          items:
+            type: string
+          type: array
+      type: object
     DownloadConfig:
       properties:
         iqCliUrl:
@@ -3725,6 +3850,13 @@ components:
         currentScore:
           format: double
           type: number
+    EvidencePath:
+      properties:
+        segments:
+          items:
+            $ref: '#/components/schemas/PathSegment'
+          type: array
+      type: object
     GitHubAppInfo:
       properties:
         accountName:
@@ -4105,6 +4237,15 @@ components:
         tokenRequestCustomParamsJson:
           type: string
       type: object
+    PathSegment:
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+      required:
+      - type
+      type: object
     Policy:
       properties:
         actions:
@@ -4386,6 +4527,8 @@ components:
       type: object
     ReachabilityConfig:
       properties:
+        dotNetAnalysis:
+          $ref: '#/components/schemas/DotNetAnalysisConfig'
         failOnError:
           type: boolean
         javaAnalysis:
@@ -4406,6 +4549,27 @@ components:
           type: string
         url:
           type: string
+      type: object
+    RelayRegisterAdminRequest:
+      properties:
+        installationId:
+          type: string
+        webhookSecret:
+          type: string
+      type: object
+    RenewWaiversRequestDTO:
+      properties:
+        comment:
+          type: string
+        newExpiryTime:
+          format: date-time
+          type: string
+        reasonId:
+          type: string
+        waiverIds:
+          items:
+            type: string
+          type: array
       type: object
     RoleNotification:
       properties:
@@ -4989,7 +5153,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.204.2-01
+  version: 1.205.3-01
 openapi: 3.0.1
 paths:
   /api/v2/applicationCategories/application:
@@ -5530,6 +5694,43 @@ paths:
             request.
       tags:
       - Application Report Data
+  /api/v2/applications/{applicationPublicId}/reports/{reportId}/vulnerabilities/{vulnerabilityId}/reachability-evidence:
+    get:
+      description: 'Get reachability evidence for a specific vulnerability showing
+        call paths from entry points to the vulnerable method.\n\nPermissions required:
+        View IQ Elements'
+      operationId: getReachabilityEvidence
+      parameters:
+      - description: The public ID of the application
+        in: path
+        name: applicationPublicId
+        required: true
+        schema:
+          type: string
+      - description: The report/scan ID
+        in: path
+        name: reportId
+        required: true
+        schema:
+          type: string
+      - description: The vulnerability ID (e.g., CVE-2023-35116)
+        in: path
+        name: vulnerabilityId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiReachabilityEvidenceResponse'
+          description: Returns reachability evidence with call paths for the specified
+            vulnerability.
+        '404':
+          description: Application, report, or vulnerability evidence not found.
+      tags:
+      - Reachability Evidence
   /api/v2/applications/{applicationPublicId}/reports/{scanId}:
     get:
       description: This is an older version of the endpoint. This call will now be
@@ -5596,6 +5797,35 @@ paths:
           description: The requested dependency tree was not found.
       tags:
       - Application Report Data
+  /api/v2/applications/{applicationPublicId}/reports/{scanId}/metadata:
+    get:
+      description: Get evaluation metadata for a specific scan. Requires READ permission
+        on the application.
+      operationId: getMetadata
+      parameters:
+      - description: Enter the applicationPublicId for the evaluated application.
+        in: path
+        name: applicationPublicId
+        required: true
+        schema:
+          type: string
+      - description: Enter the scanId (reportId) of the application report.
+        in: path
+        name: scanId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Evaluation metadata
+        '401':
+          description: Authentication required
+        '403':
+          description: Access denied
+        '404':
+          description: Scan not found
+      tags:
+      - Application Report Data
   /api/v2/applications/{applicationPublicId}/reports/{scanId}/policy:
     get:
       description: 'Use this method to retrieve the policy violation data generated
@@ -5624,6 +5854,23 @@ paths:
         schema:
           default: false
           type: boolean
+      - description: Page number (1-indexed). Must be provided together with 'pageSize'.
+          When omitted, all components are returned.
+        in: query
+        name: page
+        schema:
+          format: int32
+          minimum: 1
+          type: integer
+      - description: Number of components per page (1-500). Must be provided together
+          with 'page'. When omitted, all components are returned.
+        in: query
+        name: pageSize
+        schema:
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
       responses:
         '200':
           content:
@@ -5633,7 +5880,10 @@ paths:
           description: The response fields contain the policy violation data for the
             reportId (scanId) specified in the method call. The fields corresponding
             to 'violations' include the violation details for each policy, for the
-            component.
+            component. When 'page' and 'pageSize' are provided, the response includes
+            'page', 'pageSize', 'pageCount', and 'total' fields to support pagination.
+        '400':
+          description: Invalid pagination parameters.
       tags:
       - Application Report Data
   /api/v2/applications/{applicationPublicId}/reports/{scanId}/raw:
@@ -7479,6 +7729,72 @@ paths:
           description: Set Jira configuration successfully.
       tags:
       - Config Jira
+  /api/v2/config/legacyViolations/{ownerType}/{ownerId}:
+    get:
+      description: 'Use this method to retrieve the legacy-violation configuration
+        for an owner.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getConfig
+      parameters:
+      - description: 'Owner type. Allowed values: `application`, `organization`.'
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          pattern: application|organization
+          type: string
+      - description: Public id of the application, or id of the organization.
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiLegacyViolationStatusDTO'
+          description: Successfully retrieved legacy-violation configuration.
+      tags:
+      - Legacy Violations Configuration
+    put:
+      description: 'Use this method to update the legacy-violation configuration for
+        an owner.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: setConfig
+      parameters:
+      - description: 'Owner type. Allowed values: `application`, `organization`.'
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          pattern: application|organization
+          type: string
+      - description: Public id of the application, or id of the organization.
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiLegacyViolationStatusDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiLegacyViolationStatusDTO'
+          description: Successfully updated legacy-violation configuration.
+      tags:
+      - Legacy Violations Configuration
   /api/v2/config/mail:
     delete:
       description: 'Use this method to disable or remove an SMTP configuration.
@@ -7787,7 +8103,7 @@ paths:
 
 
         Permissions required: Edit System Configuration and Users'
-      operationId: getMetadata
+      operationId: getMetadata_1
       responses:
         '200':
           content:
@@ -8287,6 +8603,19 @@ paths:
       description: Daily history for last 30 days with cumulative totals, daily average,
         peak day. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
       operationId: getDailyHistory
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 92-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: Retrieved
@@ -8298,11 +8627,27 @@ paths:
       - Consumption
   /api/v2/consumption/export:
     get:
-      description: Export 12-month history as CSV. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
+      description: Export consumption history as CSV. When startDate/endDate are omitted,
+        defaults to 12-month history. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
       operationId: exportCsv
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: CSV body
+        '400':
+          description: Invalid date range
         '401':
           description: Not authenticated
         '403':
@@ -8313,6 +8658,19 @@ paths:
     get:
       description: 12-month consumption history. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
       operationId: getHistory
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: History retrieved
@@ -8337,6 +8695,18 @@ paths:
           - WEEKLY
           - MONTHLY
           type: string
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: Breakdown retrieved
@@ -8353,6 +8723,47 @@ paths:
       description: 12-month consumption history grouped by source. Requires CONFIGURE_SYSTEM
         or VIEW_USAGE.
       operationId: getHistoryBySource
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Retrieved
+        '401':
+          description: Not authenticated
+        '403':
+          description: Missing permission
+      tags:
+      - Consumption
+  /api/v2/consumption/history/by-stage:
+    get:
+      description: 12-month consumption history grouped by application stage. Events
+        without a matching policy_evaluation row are bucketed as 'Unknown'. Requires
+        CONFIGURE_SYSTEM or VIEW_USAGE.
+      operationId: getHistoryByStage
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: Retrieved
@@ -8367,6 +8778,19 @@ paths:
       description: Current billing window consumption summary with activity breakdown.
         Requires CONFIGURE_SYSTEM or VIEW_USAGE.
       operationId: getSummary
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: Summary retrieved
@@ -8381,6 +8805,19 @@ paths:
       description: Top consuming apps for current billing month. Requires CONFIGURE_SYSTEM
         or VIEW_USAGE.
       operationId: getTopApps
+      parameters:
+      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          endDate.
+        in: query
+        name: startDate
+        schema:
+          type: string
+      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
+          startDate. Max 366-day range inclusive.
+        in: query
+        name: endDate
+        schema:
+          type: string
       responses:
         '200':
           description: Retrieved
@@ -9277,6 +9714,30 @@ paths:
           description: Waiver has been created successfully.
       tags:
       - Firewall
+  /api/v2/firewall/container-image/{containerImageId}/policyWaiverRequest:
+    post:
+      description: "Use this method to request a waiver for all policy violations\
+        \ of a container image. \n\nPermissions required: authenticated user (waiver\
+        \ request workflow must be enabled)"
+      operationId: requestWaiver
+      parameters:
+      - description: The container image id.
+        in: path
+        name: containerImageId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiContainerImageWaiverRequestDTO'
+        description: 'Fields: comment, noteToReviewer, expiryTime, waiverReasonId'
+      responses:
+        '204':
+          description: Waiver request has been created successfully.
+      tags:
+      - Firewall
   /api/v2/firewall/metrics/embedded:
     get:
       description: 'Use this method to retrieve firewall dashboard metrics.
@@ -9343,6 +9804,59 @@ paths:
       responses:
         '204':
           description: Namespaces successfully added.
+      tags:
+      - Firewall
+  /api/v2/firewall/policyWaivers/{ownerType}/{ownerId}/{policyWaiverId}:
+    get:
+      description: 'Retrieve a single Firewall policy waiver by ID. <p>This endpoint
+        is for Firewall Dashboard use only. Authorization is based on Firewall repository-level
+        access rather than owner-level READ permission, allowing scoped users to view
+        waivers visible in their Firewall Dashboard list.<p>For scoped users, the
+        waiver owner must be reachable from their permitted proxy repositories: a
+        permitted repository itself, an organization or repository-manager ancestor
+        of one, or a container-image application linked to a permitted repository
+        via its shadow organization. Waivers at root-organization or repository-manager
+        scope are accessible to any authenticated user with access to at least one
+        proxy repository.<p>Permissions Required: READ permission on at least one
+        proxy repository.'
+      operationId: getPolicyWaiver
+      parameters:
+      - description: Owner type (application, organization, repository, repository_manager,
+          or repository_container)
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          - repository_container
+          - repository_manager
+          - repository
+          pattern: application|organization|repository|repository_manager|repository_container
+          type: string
+      - description: Owner ID
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - description: Policy waiver ID
+        in: path
+        name: policyWaiverId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Waiver details
+        '401':
+          description: Not authenticated
+        '403':
+          description: No access to any proxy repository, or waiver owner is outside
+            the user's permitted scope
+        '404':
+          description: Waiver not found
       tags:
       - Firewall
   /api/v2/firewall/quarantine/summary:
@@ -9786,11 +10300,96 @@ paths:
             requested.
       tags:
       - Firewall
+  /api/v2/firewall/repositoryManagers/{repositoryManagerId}/repositories:
+    post:
+      description: 'Use this method to add a new repository to a virtual repository
+        manager.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: addRepository
+      parameters:
+      - description: Enter the repository manager ID.
+        in: path
+        name: repositoryManagerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiRepositoryDTO'
+        description: Enter values for the new repository.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRepositoryDTO'
+          description: The response contains the details of the new repository.
+      tags:
+      - Firewall
+  /api/v2/firewall/virtualManagers:
+    post:
+      description: 'Use this method to add a new repository manager.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: addVirtualRepositoryManager
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiRepositoryManagerDTO'
+        description: Enter values for the new repository manager.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiRepositoryManagerDTO'
+          description: The response contains the details of the new repository manager.
+      tags:
+      - Firewall
+  /api/v2/firewall/waivers/renew:
+    post:
+      description: 'Renews Firewall policy waivers with a new expiry date. Records
+        the previous expiry time for audit and tracking purposes.\n\n**Supports both
+        single and bulk renewals**: Pass one or more waiver IDs in the request body.\n\n**Permissions
+        required**: Waive Policy Violations\n\n**Security**: Permission is checked
+        against the waiver''s owner. The authenticated user must have WAIVE_POLICY_VIOLATIONS
+        on the owner scope.'
+      operationId: renewWaivers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RenewWaiversRequestDTO'
+        description: 'Renewal request containing:\n- **waiverIds** (required): List
+          of waiver IDs to renew\n- **newExpiryTime** (optional): New expiry time
+          as ISO 8601 timestamp. Null means the waiver never expires.\n- **comment**
+          (optional): Comment explaining the renewal\n- **reasonId** (optional): ID
+          of a pre-defined waiver reason'
+        required: true
+      responses:
+        '200':
+          description: Waiver renewal processed. Returns counts of renewed waivers,
+            not found waivers, and any errors.
+        '400':
+          description: Bad Request. Waiver IDs list is null or empty.
+        '403':
+          description: Forbidden. Either FIREWALL license is not active or user lacks
+            WAIVE_POLICY_VIOLATIONS permission.
+      tags:
+      - Firewall
   /api/v2/githubApp:
     get:
       description: "Returns all GitHub Apps directly registered at this owner level.\
         \ Does not include inherited apps from parent organizations. \n\n**Permissions\
-        \ Required:** Configure System Configuration and Users"
+        \ Required:** View IQ Elements"
       operationId: listGitHubApps
       parameters:
       - description: Owner (organization/application) ID
@@ -10224,6 +10823,91 @@ paths:
           description: Component label deleted successfully.
       tags:
       - Component Labels
+  /api/v2/legacyViolations/application/{applicationPublicId}:
+    get:
+      description: 'Use this method to retrieve all legacy policy violations for an
+        application.
+
+
+        Permissions required: View IQ Elements'
+      operationId: listLegacyViolations
+      parameters:
+      - description: The public id of the application.
+        in: path
+        name: applicationPublicId
+        required: true
+        schema:
+          type: string
+      - description: Optional policy id filter.
+        in: query
+        name: policyId
+        schema:
+          type: string
+      - description: Optional component identifier filter, expressed as a package
+          URL (purl).
+        in: query
+        name: componentIdentifier
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiPolicyViolationDTOV2'
+                type: array
+          description: Successfully retrieved legacy violations.
+      tags:
+      - Legacy Violations
+  /api/v2/legacyViolations/application/{applicationPublicId}/grant:
+    post:
+      description: 'Use this method to grant legacy status to all eligible policy
+        violations of an application.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: grant
+      parameters:
+      - description: The public id of the application.
+        in: path
+        name: applicationPublicId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiLegacyViolationChangeResponseDTO'
+          description: Successfully granted legacy status.
+      tags:
+      - Legacy Violations
+  /api/v2/legacyViolations/application/{applicationPublicId}/revoke:
+    post:
+      description: 'Use this method to revoke legacy status from all legacy policy
+        violations of an application.
+
+
+        Permissions required: Edit IQ Elements'
+      operationId: revoke
+      parameters:
+      - description: The public id of the application.
+        in: path
+        name: applicationPublicId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiLegacyViolationChangeResponseDTO'
+          description: Successfully revoked legacy status.
+      tags:
+      - Legacy Violations
   /api/v2/licenseLegalMetadata/application/{applicationId}:
     get:
       description: 'Use this REST API to retrieve the raw license legal data for components
@@ -11129,12 +11813,11 @@ paths:
         schema:
           type: string
       - description: 'If true, include policies from parent levels in the hierarchy.
-          For repositories, includes policies from the repository and parent organization
-          (RepositoryManager and RepositoryContainer levels are skipped as they do
-          not define policies). For applications, includes policies from the application
-          and parent organization(s). For organizations, includes policies from the
-          organization and any parent organizations. Default: false (direct policies
-          only)'
+          For repositories, includes policies from the repository, RepositoryManager,
+          RepositoryContainer, and parent organization. For applications, includes
+          policies from the application and parent organization(s). For organizations,
+          includes policies from the organization and any parent organizations. Default:
+          false (direct policies only)'
         in: query
         name: includeInherited
         schema:
@@ -11554,6 +12237,53 @@ paths:
           description: Successfully retrieved all policy waiver reasons.
       tags:
       - Policy Waiver Reasons
+  /api/v2/policyWaiverRequests/{ownerType}/{ownerId}:
+    get:
+      description: 'Use this method to list all policy waiver requests for the given
+        owner.
+
+
+        Permissions required: View IQ Elements'
+      operationId: getPolicyWaiverRequests
+      parameters:
+      - description: The owner type. Possible values are application, organization,
+          repository, repository_manager, repository_container.
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          - repository_container
+          - repository_manager
+          - repository
+          pattern: application|organization|repository|repository_manager|repository_container
+          type: string
+      - description: The id for the ownerType.
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - description: Optional filter for repository format. Use 'docker' to return
+          only container repository waiver requests, or 'component' to return only
+          non-container repository waiver requests. Omit to return all.
+        in: query
+        name: repositoryFormat
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiPolicyWaiverRequestDTO'
+                type: array
+          description: The list of policy waiver requests.
+      tags:
+      - Policy Waiver Requests
   /api/v2/policyWaiverRequests/{ownerType}/{ownerId}/policyViolation/{policyViolationId}:
     post:
       description: 'Use this method to create a policy waiver request.
@@ -12042,6 +12772,14 @@ paths:
         required: true
         schema:
           type: string
+      - description: When specified, only returns active waivers expiring within this
+          many days from now. Must be a positive integer. For example, expiringWithin=7
+          returns waivers expiring in the next 7 days.
+        in: query
+        name: expiringWithin
+        schema:
+          format: int32
+          type: integer
       responses:
         '200':
           content:
@@ -12208,7 +12946,7 @@ paths:
 
 
         Permissions required: View IQ Elements'
-      operationId: getPolicyWaiver
+      operationId: getPolicyWaiver_1
       parameters:
       - description: Enter the ownerType to specify the scope. The response will contain
           the details for waivers within the scope.
@@ -12613,11 +13351,19 @@ paths:
           multipart/form-data:
             schema:
               properties:
+                client:
+                  type: string
                 componentId:
+                  type: string
+                correlationId:
+                  type: string
+                evaluationMode:
                   type: string
                 policyEvaluationStage:
                   type: string
                 purl:
+                  type: string
+                requestedBy:
                   type: string
                 scanFile:
                   format: binary
@@ -12899,7 +13645,9 @@ paths:
           enum:
           - application
           - organization
-          pattern: application|organization
+          - repository_manager
+          - repository
+          pattern: application|organization|repository_manager|repository
           type: string
       - description: Enter the corresponding id for the ownerType specified above.
         in: path
@@ -12914,8 +13662,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApiRoleMemberMappingListDTO'
           description: The response contains the assigned role Ids, users and user
-            groups for the application or organization requested. It also includes
-            members who inherit a role based on the organization hierarchy.
+            groups for the application, organization, repository manager, or repository
+            requested. It also includes members who inherit a role based on the organization
+            hierarchy.
       tags:
       - Role Memberships
   /api/v2/roleMemberships/{ownerType}/{internalOwnerId}/role/{roleId}/members:
@@ -12975,7 +13724,7 @@ paths:
   /api/v2/roleMemberships/{ownerType}/{internalOwnerId}/role/{roleId}/{memberType}/{memberName}:
     delete:
       description: 'Use this method to revoke a role from a user or user group, on
-        a specific application or organization.
+        a specific application, organization, repository manager, or repository.
 
 
         Permissions required: Edit access control'
@@ -12990,7 +13739,9 @@ paths:
           enum:
           - application
           - organization
-          pattern: application|organization
+          - repository_manager
+          - repository
+          pattern: application|organization|repository_manager|repository
           type: string
       - description: Enter the internalId associated with the ownerType specified
           above.
@@ -13029,7 +13780,7 @@ paths:
       - Role Memberships
     put:
       description: 'Use this method to grant a role to a user or user group for the
-        specified application or organization.
+        specified application, organization, repository manager, or repository.
 
 
         Permissions required: Edit access control'
@@ -13044,7 +13795,9 @@ paths:
           enum:
           - application
           - organization
-          pattern: application|organization
+          - repository_manager
+          - repository
+          pattern: application|organization|repository_manager|repository
           type: string
       - description: Enter the value for the internalId associated with the ownerType
           specified above.
@@ -13738,6 +14491,130 @@ paths:
             matching strategy was the first to match a user.'
       tags:
       - Source Control
+  /api/v2/sourceControl/githubAppWebhookUrl:
+    get:
+      description: 'Returns the App-level webhook URL the customer must paste into
+        the GitHub App configuration. Same value for every customer; available before
+        any registration exists because the URL is needed when creating the App.
+
+
+        Permissions required: Manage Automatic SCM Configuration.'
+      operationId: getGitHubAppWebhookUrl
+      responses:
+        '200':
+          description: The webhook URL.
+        '404':
+          description: The relay base URL is not configured.
+        '412':
+          description: The relay integration feature flag is disabled.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relay/deregister:
+    post:
+      description: "Deregister this IQ Server from the SCM webhook relay. Drops the\
+        \ local relay_configuration row and asks the relay to delete the customer\
+        \ record (SQS queue + DynamoDB row). Required before switching auth modes\
+        \ (PAT \u2194 GitHub App) since the relay rejects cross-mode switching of\
+        \ an existing customer.\n\nPermissions required: System Configuration."
+      operationId: deregisterFromRelay
+      responses:
+        '200':
+          description: Deregistration succeeded (or the local row was already absent).
+        '412':
+          description: The relay integration feature flag is disabled.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relay/register:
+    post:
+      description: 'Re-register this IQ Server with the SCM webhook relay. An optional
+        JSON body with installationId and webhookSecret routes the call to the GitHub
+        App registration path; an empty/missing body uses the PAT path.
+
+
+        Permissions required: System Configuration.'
+      operationId: registerWithRelay
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RelayRegisterAdminRequest'
+      responses:
+        '200':
+          description: Registration succeeded.
+        '412':
+          description: The relay integration feature flag is disabled or relayUrl
+            is not configured.
+        '503':
+          description: The relay is unavailable.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relay/rotate-key:
+    post:
+      description: "Rotate the IQ\u2192relay API key. The relay generates a fresh\
+        \ key and keeps the previous key valid for a 5-minute grace window so in-flight\
+        \ polls do not fail. The new plaintext is returned exactly once.\n\nPermissions\
+        \ required: System Configuration."
+      operationId: rotateRelayApiKey
+      responses:
+        '200':
+          description: Rotation succeeded; response body contains the new api key
+            and the ISO-8601 instant at which the previous key stops being accepted.
+        '412':
+          description: The relay integration feature flag is disabled.
+        '503':
+          description: The relay is unavailable.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relay/rotate-webhook-secret:
+    post:
+      description: "Rotate the per-customer PAT webhook signing secret. The relay\
+        \ accepts both old and new signatures during a 5-minute grace window so the\
+        \ SCM provider's webhook configuration can be updated without dropping deliveries.\
+        \ The new plaintext is returned exactly once \u2014 paste it into the SCM\
+        \ provider's webhook secret field.\n\nPermissions required: System Configuration."
+      operationId: rotateRelayWebhookSecret
+      responses:
+        '200':
+          description: Rotation succeeded; response body contains the new webhook
+            secret and the ISO-8601 instant at which the previous secret stops being
+            accepted.
+        '412':
+          description: The relay integration feature flag is disabled.
+        '503':
+          description: The relay is unavailable.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relayWebhookSecret:
+    get:
+      description: "Returns the per-customer HMAC signing secret used to verify webhook\
+        \ deliveries from the SCM provider, when a PAT-mode relay registration exists.\
+        \ GitHub App registrations have no per-customer secret and return 404. \n\n\
+        Permissions required: Manage Automatic SCM Configuration."
+      operationId: getRelayWebhookSecret
+      responses:
+        '200':
+          description: The webhook signing secret.
+        '404':
+          description: No PAT-mode relay registration exists.
+        '412':
+          description: The relay integration feature flag is disabled.
+      tags:
+      - Source Control
+  /api/v2/sourceControl/relayWebhookUrl:
+    get:
+      description: "Returns the SCM webhook URL the IQ Server is registered against,\
+        \ when the relay integration is enabled and registered. \n\nPermissions required:\
+        \ Manage Automatic SCM Configuration."
+      operationId: getRelayWebhookUrl
+      responses:
+        '200':
+          description: The webhook URL.
+        '404':
+          description: No relay registration exists.
+        '412':
+          description: The relay integration feature flag is disabled.
+      tags:
+      - Source Control
   /api/v2/sourceControl/{ownerType}/{internalOwnerId}:
     delete:
       description: 'Use this method to delete a SCM setting for the specified ownerType/ownerId.
@@ -14013,7 +14890,8 @@ paths:
         schema:
           default: false
           type: boolean
-      - description: Enter the desired SPDX version, possible values are 2.2|2.3
+      - description: Enter the desired SPDX version, possible values are 2.2|2.3|3.0
+          (3.0 only supports JSON format)
         in: query
         name: spdxVersion
         schema:
@@ -14074,7 +14952,8 @@ paths:
         schema:
           default: false
           type: boolean
-      - description: Enter the desired SPDX version, possible values are 2.2|2.3
+      - description: Enter the desired SPDX version, possible values are 2.2|2.3|3.0
+          (3.0 only supports JSON format)
         in: query
         name: spdxVersion
         schema:
@@ -14566,6 +15445,67 @@ paths:
       security: []
       tags:
       - Vulnerability Details
+  /api/v2/waiverExpirationNotificationConfig/{ownerType}/{ownerId}:
+    get:
+      description: 'Returns the effective waiver expiration notification configuration
+        for the given owner. If the owner has no custom configuration, the inherited
+        configuration from the parent is returned with inheritConfig=true.<p>Permissions
+        required: View IQ Elements'
+      operationId: getConfig_1
+      parameters:
+      - description: The owner type (organization, repository_manager, or repository_container).
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          pattern: organization|repository_manager|repository_container
+          type: string
+      - description: The internal owner ID assigned by IQ Server.
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiWaiverExpirationNotificationConfigDTO'
+          description: The effective notification configuration.
+      tags:
+      - Waiver Expiration Notification Config
+    put:
+      description: 'Sets the waiver expiration notification configuration for the
+        given owner. Set inheritConfig=true to inherit the configuration from the
+        parent.<p>Permissions required: Edit IQ Elements'
+      operationId: saveConfig
+      parameters:
+      - description: The owner type (organization, repository_manager, or repository_container).
+        in: path
+        name: ownerType
+        required: true
+        schema:
+          pattern: organization|repository_manager|repository_container
+          type: string
+      - description: The internal owner ID assigned by IQ Server.
+        in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiWaiverExpirationNotificationConfigDTO'
+        description: The notification configuration to save.
+        required: true
+      responses:
+        '204':
+          description: Configuration saved successfully.
+      tags:
+      - Waiver Expiration Notification Config
   /api/v2/{ownerType}/{internalOwnerId}/configuration/publicSource/cpe:
     get:
       description: 'This method allows to retrieve the applicable cpe matching configuration
@@ -14752,6 +15692,12 @@ tags:
 - name: GitHub App
 - description: GitHub App configuration operations
   name: GitHub App Configuration
+- description: Use this REST API to list, grant, and revoke legacy status for policy
+    violations of an application.
+  name: Legacy Violations
+- description: Use this REST API to view and update legacy-violation configuration
+    for an application or organization.
+  name: Legacy Violations Configuration
 - description: Use this REST API to retrieve license legal metadata in raw or HTML
     format.
   name: License Legal Metadata Report
@@ -14789,6 +15735,9 @@ tags:
   name: Policy Waivers
 - description: Use this REST API to manage a product license.
   name: Product License
+- description: Use this REST API to retrieve reachability evidence showing call paths
+    to vulnerable methods.
+  name: Reachability Evidence
 - description: 'Use this REST API to view application scan reports, generate a list
     of stale waivers, view existing policy waivers on components, view quarantined
     components and retrieve additional metrics data. '
@@ -14842,3 +15791,5 @@ tags:
   name: Users
 - description: Use this REST API to retrieve vulnerability details.
   name: Vulnerability Details
+- description: Configure when and to whom notifications are sent before waivers expire.
+  name: Waiver Expiration Notification Config
