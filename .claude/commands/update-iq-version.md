@@ -91,10 +91,32 @@ Read these before making any changes, so you understand the established conventi
    ```
    If `update-spec.py` was patched, call that out explicitly in the PR body/description (what broke, what you changed) so the reviewer isn't surprised by a diff outside `spec/openapi.yaml`.
 
-10. **Report back**: summarize the new version, whether `update-spec.py` needed a new patch block (and why), and the PR URL. Do not merge the PR yourself — this repo's actual releases happen via `semantic-release` off commits to `main` per `README.md`, after human review.
+10. **Report back**: summarize the new version, whether `update-spec.py` needed a new patch block (and why), and the PR URL. Do not merge the PR yourself — wait for human review and merge.
+
+11. **Wait for the PR to be merged, then explicitly ask the user to confirm it has been merged** (e.g. via `AskUserQuestion` or a plain question) before proceeding — never assume or poll GitHub for merge status yourself.
+
+12. **Once the user confirms the merge, clean up the local branch:**
+    ```
+    git checkout main
+    git pull origin main
+    ```
+    - Confirm the merge commit for this PR is now in `main`'s history (`git log --oneline -5`).
+    - Delete the local feature branch with `git branch -d "feat/iq-$1"` (plain `-d`, not `-D`) — if git refuses because it doesn't look merged, stop and investigate rather than force-deleting; that means something is off (e.g. the wrong PR was merged, or the branch name doesn't match).
+    - The remote branch is normally auto-deleted by GitHub on merge (this repo has `delete_branch_on_merge` enabled). Only if `git branch -r` still shows `origin/feat/iq-$1` after the pull, ask the user before removing it with `git push origin --delete "feat/iq-$1"`.
+
+13. **Prompt the user about cutting a release** — do not tag or push a tag without explicit confirmation, since pushing a tag triggers `.github/workflows/release.yaml`, which builds and **publishes** all three client libraries live (PyPI, npm, and a push to the separate `nexus-iq-api-client-go` repo). This is irreversible, shared-state, and publicly visible.
+    - This repo's actual release mechanism is a pushed `v<version>` tag (see `release.yaml`'s `on: push: tags: 'v*'`), not the commit-message-driven `semantic-release` flow described in `README.md`'s "Releasing" section — that section appears to describe an older or aspirational process; trust `release.yaml` over the README if they ever conflict, and flag the discrepancy to the user rather than silently picking one.
+    - The tag's MINOR version component tracks the IQ Server version (see `git tag --list 'v0.*' | sort -V` for precedent, e.g. `v0.204.0`, `v0.204.1`, `v0.204.2`). For a first release against this IQ version, suggest `v0.$1.0`; ask the user to confirm the exact tag and message rather than assuming.
+    - Once confirmed:
+      ```
+      git tag -a "v0.$1.0" -m "<user-confirmed message>"
+      git push origin "v0.$1.0"
+      ```
 
 ## Guardrails
 
 - Never echo the IQ Server URL or credentials from `$2` back into command output, commit messages, or the PR.
 - Don't touch `.github/workflows/detect-iq-release.yaml`, `build.yaml`, or `release.yaml` as part of this task unless the user separately asks you to change the automation itself.
 - Don't add new `openapi-generator` languages, bump the pinned `OPEN_API_GENERATOR_VERSION`, or restructure `update-spec.py`'s existing patch blocks — stay scoped to landing this one IQ version bump the same way every prior one in `git log` was landed.
+- Never push a release tag without the user's explicit, informed confirmation — it triggers live publishing to PyPI/npm/GitHub with no undo.
+- Never force-delete (`-D`) the local feature branch — if `-d` refuses, stop and ask the user rather than overriding it.
