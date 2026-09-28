@@ -9,6 +9,19 @@ components:
         targetType:
           type: string
       type: object
+    AiDeveloperOptInStatus:
+      properties:
+        externalDatabaseRequired:
+          type: boolean
+        message:
+          type: string
+        optedIn:
+          type: boolean
+        optedInAt:
+          type: string
+        optedInBy:
+          type: string
+      type: object
     ApiAiModelContentTypeDTO:
       properties:
         id:
@@ -221,6 +234,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
         password:
@@ -868,6 +882,8 @@ components:
           format: date-time
           type: string
         hash:
+          type: string
+        hrcId:
           type: string
         legacyViolationTime:
           format: date-time
@@ -1818,7 +1834,6 @@ components:
           - EDIT_ROLES
           - VIEW_ROLES
           - ACCESS_AUDIT_LOG
-          - VIEW_USAGE
           - WAIVE_POLICY_VIOLATIONS
           - CHANGE_LICENSES
           - CHANGE_SECURITY_VULNERABILITIES
@@ -2635,6 +2650,7 @@ components:
           type: string
         upstreamUrl:
           type: string
+          writeOnly: true
       type: object
     ApiRepositoryListDTO:
       properties:
@@ -2651,6 +2667,7 @@ components:
           type: string
         managerType:
           enum:
+          - traditional
           - virtual
           type: string
         name:
@@ -2842,6 +2859,68 @@ components:
         packageUrl:
           type: string
         stageId:
+          type: string
+      type: object
+    ApiSearchIndexAnalyzeDTO:
+      properties:
+        activeJobId:
+          type: string
+        advancedSearchEnabled:
+          type: boolean
+        applicationCount:
+          format: int64
+          type: integer
+        buildingGenerationId:
+          type: string
+        componentCount:
+          format: int64
+          type: integer
+        estateCapturedAt:
+          format: date-time
+          type: string
+        etaHighMinutes:
+          format: int32
+          type: integer
+        etaLowMinutes:
+          format: int32
+          type: integer
+        failedChangeCount:
+          format: int64
+          type: integer
+        healthStatus:
+          type: string
+        lastCleanupAt:
+          format: date-time
+          type: string
+        lastSuccessfulCutoverAt:
+          format: date-time
+          type: string
+        nouxUnlockState:
+          type: string
+        pendingChangeCount:
+          format: int64
+          type: integer
+        queueLagSeconds:
+          format: int64
+          type: integer
+        recommendedOp:
+          type: string
+        servingGenerationId:
+          type: string
+        violationCount:
+          format: int64
+          type: integer
+      type: object
+    ApiSearchIndexJobRequestDTO:
+      properties:
+        jobType:
+          description: 'Job to run: FULL_REBUILD or FIRST_TIME_INDEX.'
+          example: FULL_REBUILD
+          type: string
+        trigger:
+          description: 'What asked for the job: UNLOCK_WIZARD, HEALTH_UI, SUPPORT
+            or SYSTEM. Defaults to HEALTH_UI.'
+          example: HEALTH_UI
           type: string
       type: object
     ApiSearchResultDTOV2:
@@ -3464,6 +3543,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       type: object
@@ -3523,6 +3603,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       type: object
@@ -3757,14 +3838,14 @@ components:
     ContainerImageInQuarantineData:
       description: List of items for the current page
       properties:
-        applicationId:
-          type: string
         applicationName:
           type: string
         applicationPublicId:
           type: string
         openTime:
           type: number
+        ownerId:
+          type: string
         policyViolationCount:
           format: int64
           type: integer
@@ -3951,11 +4032,35 @@ components:
           - policyWaiverReason
           - policyWaiverComment
           - policyWaiverCreatedAt
+          - policyWaiverCreatedAtEpochMs
           - policyWaiverExpiresAt
+          - policyWaiverExpiresAtEpochMs
           - policyWaiverScopeOwnerId
           - policyWaiverScopeOwnerType
           - policyWaiverThreatLevel
           - policyWaiverWaivedBy
+          - policyWaiverAuto
+          - policyWaiverIsAuto
+          - policyWaiverExpiryStatus
+          - policyWaiverPolicyType
+          - policyWaiverScope
+          - policyWaiverRequestStatus
+          - requesterName
+          - reviewerName
+          - reviewTime
+          - rejectionReason
+          - noteToReviewer
+          - applicationLastEvaluationTimeEpochMs
+          - applicationStageSeverityCount
+          - componentViolationPolicyType
+          - componentViolationState
+          - componentMaxPolicyThreatLevel
+          - vulnerabilityFirstSeenEpochMs
+          - applicationMaxPolicyThreatLevel
+          - applicationViolationStage
+          - applicationViolationPolicyType
+          - applicationViolationState
+          - applicationViolationStateSortOrdinal
           type: string
         searchResultItemDTOS:
           items:
@@ -4066,6 +4171,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       type: object
@@ -4132,6 +4238,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       type: object
@@ -4666,6 +4773,75 @@ components:
         failOnZeroComponents:
           type: boolean
       type: object
+    SearchIndexJob:
+      properties:
+        active:
+          type: boolean
+        activeSlot:
+          type: string
+        buildingGenerationId:
+          type: string
+        cancelRequestedAt:
+          format: date-time
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        createdByUserId:
+          type: string
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+        etaFinishAt:
+          format: date-time
+          type: string
+        finishedAt:
+          format: date-time
+          type: string
+        id:
+          type: string
+        jobType:
+          type: string
+        phase:
+          type: string
+        progressPercent:
+          format: int32
+          type: integer
+        recommendedOp:
+          type: string
+        servingGenerationIdAtStart:
+          type: string
+        startedAt:
+          format: date-time
+          type: string
+        status:
+          type: string
+        trigger:
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+      type: object
+    SearchIndexJobEvent:
+      properties:
+        createdAt:
+          format: date-time
+          type: string
+        eventCode:
+          type: string
+        id:
+          type: string
+        message:
+          type: string
+        searchIndexJobId:
+          type: string
+        seq:
+          format: int64
+          type: integer
+        severity:
+          type: string
+      type: object
     SearchResultDTO:
       properties:
         groupingByDTOS:
@@ -4700,14 +4876,37 @@ components:
           type: string
         applicationCategoryName:
           type: string
+        applicationCategoryNames:
+          items:
+            type: string
+          type: array
         applicationId:
           type: string
+        applicationLastEvaluationTimeEpochMs:
+          format: int64
+          type: integer
         applicationName:
           type: string
         applicationPublicId:
           type: string
+        applicationStageSeverityCounts:
+          items:
+            type: string
+          type: array
         applicationVersion:
           type: string
+        applicationViolationPolicyTypes:
+          items:
+            type: string
+          type: array
+        applicationViolationStages:
+          items:
+            type: string
+          type: array
+        applicationViolationStates:
+          items:
+            type: string
+          type: array
         componentEffectiveLicenseId:
           type: string
         componentEffectiveLicenseName:
@@ -4731,7 +4930,17 @@ components:
           type: integer
         componentName:
           type: string
+        componentViolationPolicyTypes:
+          items:
+            type: string
+          type: array
+        componentViolationStates:
+          items:
+            type: string
+          type: array
         itemType:
+          type: string
+        noteToReviewer:
           type: string
         organizationId:
           type: string
@@ -4763,17 +4972,66 @@ components:
           type: integer
         policyViolationWaiverStatus:
           type: string
+        policyWaiverAuto:
+          type: boolean
+        policyWaiverComment:
+          type: string
+        policyWaiverCreatedAt:
+          type: string
+        policyWaiverExpiresAt:
+          type: string
+        policyWaiverExpiryStatus:
+          type: string
+        policyWaiverId:
+          type: string
+        policyWaiverIsAuto:
+          type: boolean
+        policyWaiverPolicyId:
+          type: string
+        policyWaiverPolicyName:
+          type: string
+        policyWaiverPolicyType:
+          type: string
+        policyWaiverReason:
+          type: string
+        policyWaiverRequestStatus:
+          type: string
+        policyWaiverScope:
+          type: string
+        policyWaiverScopeOwnerId:
+          type: string
+        policyWaiverScopeOwnerType:
+          type: string
+        policyWaiverThreatLevel:
+          format: int32
+          type: integer
+        policyWaiverWaivedBy:
+          type: string
+        rejectionReason:
+          type: string
         reportId:
+          type: string
+        requesterName:
           type: string
         resultIndex:
           format: int32
           type: integer
+        reviewTime:
+          type: string
+        reviewerName:
+          type: string
         sbomSpecification:
           type: string
         vulnerabilityDescription:
           type: string
+        vulnerabilityFirstSeenEpochMs:
+          format: int64
+          type: integer
         vulnerabilityId:
           type: string
+        vulnerabilitySeverity:
+          format: float
+          type: number
         vulnerabilityStatus:
           type: string
       type: object
@@ -5080,6 +5338,7 @@ components:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       type: object
@@ -5185,9 +5444,34 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.206.0-01
+  version: 1.207.0-01
 openapi: 3.0.1
 paths:
+  /api/v2/ai-developer/opt-in:
+    get:
+      operationId: getOptIn
+      responses:
+        '200': &id001
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiDeveloperOptInStatus'
+          description: default response
+        default: *id001
+      tags:
+      - Ai - Developer
+    post:
+      operationId: optIn
+      responses:
+        '200': &id002
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiDeveloperOptInStatus'
+          description: default response
+        default: *id002
+      tags:
+      - Ai - Developer
   /api/v2/applicationCategories/application:
     get:
       description: Grouping applications with similar characteristics into categories
@@ -5479,13 +5763,13 @@ paths:
           default: false
           type: boolean
       responses:
-        '200': &id001
+        '200': &id003
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiApplicationListDTO'
           description: default response
-        default: *id001
+        default: *id003
       tags:
       - Applications
     post:
@@ -5731,7 +6015,7 @@ paths:
       description: 'Get reachability evidence for a specific vulnerability showing
         call paths from entry points to the vulnerable method.\n\nPermissions required:
         View IQ Elements'
-      operationId: getReachabilityEvidence
+      operationId: getReachabilityEvidence_1
       parameters:
       - description: The public ID of the application
         in: path
@@ -5795,7 +6079,7 @@ paths:
 
 
         Permissions required: View IQ Elements'
-      operationId: getDependencyTree
+      operationId: getDependencyTree_1
       parameters:
       - description: Enter the applicationPublicId created at the time of creating
           the application.
@@ -5863,7 +6147,7 @@ paths:
       description: 'Use this method to retrieve the policy violation data generated
         as a result of an application evaluation, for each component identified in
         the application evaluation./n/nPermissions required: View IQ Elements'
-      operationId: getPolicyViolations_1
+      operationId: getPolicyViolations_2
       parameters:
       - description: Enter the applicationPublicId created at the time of creating
           the application.
@@ -5930,7 +6214,7 @@ paths:
 
 
         Permissions required: View IQ Elements'
-      operationId: getRawData
+      operationId: getRawData_1
       parameters:
       - description: 'Enter the applicationPublicId (assigned at the time of creating
           a new application.) '
@@ -8703,235 +8987,6 @@ paths:
           description: Successfully retrieved the Zscaler quota.
       tags:
       - Config Zscaler
-  /api/v2/consumption/daily-history:
-    get:
-      description: Daily history for last 30 days with cumulative totals, daily average,
-        peak day. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: getDailyHistory
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 92-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/export:
-    get:
-      description: Export consumption history as CSV. When startDate/endDate are omitted,
-        defaults to 12-month history. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: exportCsv
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: CSV body
-        '400':
-          description: Invalid date range
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/history:
-    get:
-      description: 12-month consumption history. Requires CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: getHistory
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: History retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/history/breakdown:
-    get:
-      description: Consumption history with per-activity breakdown; aggregation=daily|weekly|monthly.
-        Requires CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: getHistoryBreakdown
-      parameters:
-      - in: query
-        name: aggregation
-        schema:
-          default: monthly
-          enum:
-          - DAILY
-          - WEEKLY
-          - MONTHLY
-          type: string
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Breakdown retrieved
-        '400':
-          description: Invalid aggregation
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/history/by-source:
-    get:
-      description: 12-month consumption history grouped by source. Requires CONFIGURE_SYSTEM
-        or VIEW_USAGE.
-      operationId: getHistoryBySource
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/history/by-stage:
-    get:
-      description: 12-month consumption history grouped by application stage. Events
-        without a matching policy_evaluation row are bucketed as 'Unknown'. Requires
-        CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: getHistoryByStage
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/summary:
-    get:
-      description: Current billing window consumption summary with activity breakdown.
-        Requires CONFIGURE_SYSTEM or VIEW_USAGE.
-      operationId: getSummary
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Summary retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
-  /api/v2/consumption/top-apps:
-    get:
-      description: Top consuming apps for current billing month. Requires CONFIGURE_SYSTEM
-        or VIEW_USAGE.
-      operationId: getTopApps
-      parameters:
-      - description: Start date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          endDate.
-        in: query
-        name: startDate
-        schema:
-          type: string
-      - description: End date in YYYY-MM-DD format, inclusive. Optional. Must accompany
-          startDate. Max 366-day range inclusive.
-        in: query
-        name: endDate
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Retrieved
-        '401':
-          description: Not authenticated
-        '403':
-          description: Missing permission
-      tags:
-      - Consumption
   /api/v2/cycloneDx/{cdxVersion}/{applicationId}/reports/{reportId}:
     get:
       description: 'Use this method to generate a CycloneDX SBOM for an application.<p>Permissions
@@ -10405,60 +10460,6 @@ paths:
             requested.
       tags:
       - Firewall
-  /api/v2/firewall/repositoryManagers/{repositoryManagerId}/repositories:
-    post:
-      description: 'Use this method to add a new repository to a virtual repository
-        manager.
-
-
-        Permissions required: Edit IQ Elements'
-      operationId: addRepository
-      parameters:
-      - description: Enter the repository manager ID.
-        in: path
-        name: repositoryManagerId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApiRepositoryDTO'
-        description: Enter values for the new repository.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiRepositoryDTO'
-          description: The response contains the details of the new repository.
-      tags:
-      - Firewall
-  /api/v2/firewall/virtualManagers:
-    post:
-      description: 'Use this method to add a new repository manager.
-
-
-        Permissions required: Edit IQ Elements'
-      operationId: addVirtualRepositoryManager
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ApiRepositoryManagerDTO'
-        description: Enter values for the new repository manager.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiRepositoryManagerDTO'
-          description: The response contains the details of the new repository manager.
-      tags:
-      - Firewall
   /api/v2/firewall/waivers/renew:
     post:
       description: 'Renews Firewall policy waivers with a new expiry date. Records
@@ -10665,7 +10666,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id of the application, organization or the repository.
         in: path
@@ -10720,7 +10722,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id for the selected ownerType.
         in: path
@@ -10766,7 +10769,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id for the selected ownerType.
         in: path
@@ -10814,7 +10818,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id for the application, organization or repository
         in: path
@@ -10864,7 +10869,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the ownerId
         in: path
@@ -10909,7 +10915,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id for the selected ownerType.
         in: path
@@ -11467,7 +11474,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id of the application, organization or the repository.
         in: path
@@ -11511,7 +11519,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id of the application, organization or the repository.
         in: path
@@ -11568,7 +11577,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id of the owner.
         in: path
@@ -11611,7 +11621,8 @@ paths:
           - repository_container
           - repository_manager
           - repository
-          pattern: application|organization|repository|repository_manager|repository_container
+          - hosted_repository_component
+          pattern: application|organization|repository|repository_manager|repository_container|hosted_repository_component
           type: string
       - description: Enter the id of the application, organization or the repository.
         in: path
@@ -11953,7 +11964,7 @@ paths:
 
 
         Permissions required: View IQ Elements'
-      operationId: getPolicyViolations
+      operationId: getPolicyViolations_1
       parameters:
       - description: Enter the policyIds to obtain the corresponding violation details
         in: query
@@ -13300,7 +13311,8 @@ paths:
         name: stage
         schema:
           type: string
-      - description: Enter the exact no. of most recent reports to retrieve.
+      - description: Enter the exact no. of most recent reports to retrieve (maximum
+          100; larger values are clamped).
         in: query
         name: limit
         schema:
@@ -13506,30 +13518,20 @@ paths:
           multipart/form-data:
             schema:
               properties:
-                client:
-                  type: string
                 componentId:
                   type: string
-                correlationId:
-                  type: string
-                evaluationMode:
-                  type: string
                 policyEvaluationStage:
-                  type: string
-                purl:
-                  type: string
-                requestedBy:
                   type: string
                 scanFile:
                   format: binary
                   type: string
               type: object
       responses:
-        '200': &id002
+        '200': &id004
           content:
             application/json: {}
           description: default response
-        default: *id002
+        default: *id004
       tags:
       - Repositories
   /api/v2/repositories/{repositoryManagerInstanceId}/{repositoryPublicId}/components/quarantined/pathnames:
@@ -14397,6 +14399,131 @@ paths:
           description: Index created successfully.
       tags:
       - Advanced Search
+  /api/v2/search/advanced/index/analyze:
+    get:
+      description: Return current index health (green/yellow/red), recommendation,
+        and estate snapshot. Works on precomputed CURRENT rows in a constant number
+        of round trips, refreshing the stored derived status as it goes.
+      operationId: analyze
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSearchIndexAnalyzeDTO'
+          description: Analyze status
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/cancel:
+    post:
+      description: 'Request cancellation of an in-flight Advanced Search index rebuild.
+        On a Lucene-backed deployment the previous complete index continues to serve
+        search results. Cancellation is not supported on OpenSearch-backed deployments,
+        where the rebuild runs to completion. Use the status method to confirm whether
+        a rebuild is still in progress.
+
+
+        Permissions required: Edit System Configuration and Users'
+      operationId: cancelSearchIndexRebuild
+      responses:
+        '204':
+          description: Cancel requested.
+      tags:
+      - Advanced Search
+  /api/v2/search/advanced/index/jobs:
+    post:
+      description: Start an index job (FULL_REBUILD or FIRST_TIME_INDEX).
+      operationId: startJob
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiSearchIndexJobRequestDTO'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchIndexJob'
+          description: Created job
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/jobs/active:
+    get:
+      description: Return the active index job, if any.
+      operationId: getActiveJob
+      responses:
+        '200': &id005
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchIndexJob'
+          description: default response
+        default: *id005
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/jobs/cancel:
+    post:
+      description: Cancel the active job; Lucene keeps serving the blue index.
+      operationId: cancelActiveJob
+      responses:
+        '200': &id006
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchIndexJob'
+          description: default response
+        default: *id006
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/jobs/{jobId}:
+    get:
+      description: Return a job by id.
+      operationId: getJob
+      parameters:
+      - in: path
+        name: jobId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200': &id007
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchIndexJob'
+          description: default response
+        default: *id007
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/jobs/{jobId}/events:
+    get:
+      description: Return structured job events (activity log).
+      operationId: getJobEvents
+      parameters:
+      - in: path
+        name: jobId
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: limit
+        schema:
+          default: 100
+          format: int32
+          type: integer
+      responses:
+        '200': &id008
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SearchIndexJobEvent'
+                type: array
+          description: default response
+        default: *id008
+      tags:
+      - Advanced Search Index Health
   /api/v2/search/component:
     get:
       description: 'Use this method to retrieve the component details from the application
@@ -15017,7 +15144,7 @@ paths:
 
 
         Permissions required: View IQ Elemets'
-      operationId: getByScanId
+      operationId: getByScanId_1
       parameters:
       - description: Enter the applicationId for the application you want to generate
           the SBOM(s).
@@ -15078,7 +15205,7 @@ paths:
 
 
         Permissions required: View IQ Elements'
-      operationId: getLatestForStage
+      operationId: getLatestForStage_1
       parameters:
       - description: Enter the applicationId for the application you want to generate
           the SBOM(s).
@@ -15544,6 +15671,7 @@ paths:
           - repository_container
           - repository_manager
           - repository
+          - hosted_repository_component
           - global
           type: string
       - description: Enter the ownerId where this vulnerability was detected. The
@@ -15725,6 +15853,9 @@ tags:
 - description: Use the Advanced Search REST API to perform searches on Lifecycle application
     scan reports.
   name: Advanced Search
+- description: Index Analyze status and rebuild/cleanup job control.
+  name: Advanced Search Index Health
+- name: Ai - Developer
 - description: 'Use the Application Categories REST API to manage the application
     categories or tags assigned to the applications in an organization. '
   name: Application Categories
@@ -15821,7 +15952,6 @@ tags:
 - description: Use this REST API to manage the configuration of Firewall for JFrog
     Artifactory.
   name: Configure Artifactory Connection
-- name: Consumption
 - description: Use the CPE Matching Configuration REST API to add/set/remove cpe matching
     configuration to organizations and applications
   name: CPE Matching Configuration
@@ -15891,7 +16021,7 @@ tags:
 - description: Use this REST API to manage a product license.
   name: Product License
 - description: Use this REST API to retrieve reachability evidence showing call paths
-    to vulnerable methods.
+    to vulnerable methods for a hosted repository component.
   name: Reachability Evidence
 - description: 'Use this REST API to view application scan reports, generate a list
     of stale waivers, view existing policy waivers on components, view quarantined
