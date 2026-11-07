@@ -1030,6 +1030,35 @@ components:
         dependencyTree:
           $ref: '#/components/schemas/ApiDependencyTreeNodeDTO'
       type: object
+    ApiEcosystemConfigurationDTO:
+      properties:
+        allowOverride:
+          type: boolean
+        allowOverrideInheritedFrom:
+          $ref: '#/components/schemas/OwnerRefDTO'
+        axes:
+          additionalProperties:
+            $ref: '#/components/schemas/AxisValueDTO'
+          type: object
+        id:
+          type: string
+        inheritanceCategoryIds:
+          items:
+            type: string
+          type: array
+        inheritanceMode:
+          type: string
+        ownerId:
+          type: string
+        ownerType:
+          type: string
+        packageFormat:
+          type: string
+        packageManagers:
+          items:
+            type: string
+          type: array
+      type: object
     ApiEnhancedPolicyViolationDTOV2:
       properties:
         component:
@@ -1038,6 +1067,8 @@ components:
           items:
             $ref: '#/components/schemas/ApiConstraintViolationDTO'
           type: array
+        dependencyType:
+          type: string
         fixTime:
           format: date-time
           type: string
@@ -1056,6 +1087,8 @@ components:
         policyName:
           type: string
         policyViolationId:
+          type: string
+        reachabilityStatus:
           type: string
         reportId:
           type: string
@@ -1093,6 +1126,11 @@ components:
         displayName:
           type: string
         hash:
+          type: string
+        managerType:
+          enum:
+          - traditional
+          - virtual
           type: string
         matchState:
           type: string
@@ -1170,6 +1208,11 @@ components:
         displayName:
           type: string
         hash:
+          type: string
+        managerType:
+          enum:
+          - traditional
+          - virtual
           type: string
         matchState:
           type: string
@@ -3181,6 +3224,9 @@ components:
           type: integer
         stampedIqVersion:
           type: string
+        unaliasedNexusOneIndexCount:
+          format: int32
+          type: integer
         violationCount:
           format: int64
           type: integer
@@ -3211,9 +3257,6 @@ components:
           type: string
         productVersion:
           type: string
-        retiredAt:
-          format: date-time
-          type: string
         role:
           type: string
         schemaVersion:
@@ -3228,8 +3271,6 @@ components:
       type: object
     ApiSearchIndexGenerationsDTO:
       properties:
-        previousRetired:
-          $ref: '#/components/schemas/ApiSearchIndexGenerationDTO'
         serving:
           $ref: '#/components/schemas/ApiSearchIndexGenerationDTO'
       type: object
@@ -3242,6 +3283,8 @@ components:
         docCount:
           format: int64
           type: integer
+        docTypeScope:
+          type: string
         errorCode:
           type: string
         errorMessage:
@@ -3282,6 +3325,25 @@ components:
       type: object
     ApiSearchIndexJobRequestDTO:
       properties:
+        docTypes:
+          description: Doc types to derive from the database, for a FULL_REBUILD.
+            The rest are copied from the index serving now and keep the mappings and
+            shard count they were built with. Absent, null or empty derives every
+            doc type, and so does naming all of them. Naming any reference doc type
+            derives all six, because one pass derives them together, and application
+            is always derived.
+          example:
+          - component
+          items:
+            description: Doc types to derive from the database, for a FULL_REBUILD.
+              The rest are copied from the index serving now and keep the mappings
+              and shard count they were built with. Absent, null or empty derives
+              every doc type, and so does naming all of them. Naming any reference
+              doc type derives all six, because one pass derives them together, and
+              application is always derived.
+            example: '["component"]'
+            type: string
+          type: array
         jobType:
           description: 'Job to run: FULL_REBUILD or FIRST_TIME_INDEX.'
           example: FULL_REBUILD
@@ -3291,6 +3353,17 @@ components:
             or SYSTEM. Defaults to HEALTH_UI.'
           example: HEALTH_UI
           type: string
+      type: object
+    ApiSearchIndexSetupDTO:
+      properties:
+        config:
+          $ref: '#/components/schemas/Config'
+        connection:
+          $ref: '#/components/schemas/Connection'
+        index:
+          $ref: '#/components/schemas/Index'
+        nexusOneEnabled:
+          type: boolean
       type: object
     ApiSearchIndexUnlockStateDTO:
       properties:
@@ -3940,20 +4013,46 @@ components:
       properties:
         apiKey:
           type: string
+        authMethod:
+          enum:
+          - BASIC
+          - OAUTH
+          type: string
         eulaAgreed:
           type: boolean
         hostname:
           type: string
         mavenFormatEnabled:
           type: boolean
+        mavenFormatMaxUrls:
+          format: int32
+          type: integer
+        maxUrls:
+          format: int32
+          type: integer
         npmFormatEnabled:
           type: boolean
+        npmFormatMaxUrls:
+          format: int32
+          type: integer
         nugetFormatEnabled:
           type: boolean
+        nugetFormatMaxUrls:
+          format: int32
+          type: integer
+        oauthClientId:
+          type: string
+        oauthClientSecret:
+          type: string
+        oauthIdentityDomain:
+          type: string
         password:
           type: string
         pypiFormatEnabled:
           type: boolean
+        pypiFormatMaxUrls:
+          format: int32
+          type: integer
         username:
           type: string
       type: object
@@ -3988,6 +4087,13 @@ components:
           - hosted_repository_component
           - global
           type: string
+      type: object
+    ApplicableEcosystemConfigurations:
+      properties:
+        ecosystemConfigurationsByOwner:
+          items:
+            $ref: '#/components/schemas/EcosystemConfigurationsByOwner'
+          type: array
       type: object
     ApplicableLabels:
       properties:
@@ -4090,6 +4196,19 @@ components:
           type: string
         templateName:
           type: string
+      type: object
+    AxisValueDTO:
+      properties:
+        configured:
+          items:
+            type: string
+          type: array
+        effective:
+          items:
+            type: string
+          type: array
+        inheritedFrom:
+          $ref: '#/components/schemas/OwnerRefDTO'
       type: object
     BulkSecurityVulnerabilityDataDTO:
       properties:
@@ -4235,6 +4354,13 @@ components:
         triggerJson:
           type: string
       type: object
+    Config:
+      properties:
+        configured:
+          type: boolean
+        reason:
+          type: string
+      type: object
     ConfigurationValidationResult:
       properties:
         configurationComplete:
@@ -4247,6 +4373,19 @@ components:
           $ref: '#/components/schemas/ValidationResult'
         tokenPermissions:
           $ref: '#/components/schemas/ValidationResult'
+      type: object
+    Connection:
+      properties:
+        checkedAt:
+          type: string
+        reason:
+          type: string
+        status:
+          enum:
+          - NOT_TESTED
+          - CONNECTED
+          - FAILED
+          type: string
       type: object
     Constraint:
       properties:
@@ -4375,6 +4514,27 @@ components:
         iqCliUrl:
           type: string
         iqCliVersion:
+          type: string
+      type: object
+    EcosystemConfigurationsByOwner:
+      properties:
+        ecosystemConfigurations:
+          items:
+            $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+          type: array
+        ownerId:
+          type: string
+        ownerName:
+          type: string
+        ownerType:
+          enum:
+          - application
+          - organization
+          - repository_container
+          - repository_manager
+          - repository
+          - hosted_repository_component
+          - global
           type: string
       type: object
     EpssData:
@@ -4513,6 +4673,33 @@ components:
             $ref: '#/components/schemas/SearchResultItemDTO'
           type: array
       type: object
+    Index:
+      properties:
+        activeJobId:
+          type: string
+        hasPrevious:
+          type: boolean
+        lastFailure:
+          $ref: '#/components/schemas/LastFailure'
+        lastIndexedAt:
+          type: string
+        lastJobStatus:
+          type: string
+        percent:
+          format: int32
+          type: integer
+        startedAt:
+          type: string
+        startedBy:
+          type: string
+        status:
+          enum:
+          - NONE
+          - BUILDING
+          - FAILED
+          - ACTIVE
+          type: string
+      type: object
     InnerSourceData:
       properties:
         innerSourceComponentPurl:
@@ -4619,6 +4806,13 @@ components:
           - repository
           - hosted_repository_component
           - global
+          type: string
+      type: object
+    LastFailure:
+      properties:
+        errorCode:
+          type: string
+        jobId:
           type: string
       type: object
     LegalSourceLinkDTO:
@@ -4822,6 +5016,15 @@ components:
         idpTokenUrl:
           type: string
         tokenRequestCustomParamsJson:
+          type: string
+      type: object
+    OwnerRefDTO:
+      properties:
+        ownerId:
+          type: string
+        ownerName:
+          type: string
+        ownerType:
           type: string
       type: object
     PathSegment:
@@ -5227,7 +5430,7 @@ components:
           type: boolean
         activeSlot:
           type: string
-        buildingGenerationId:
+        buildingIndexName:
           type: string
         cancelRequestedAt:
           format: date-time
@@ -5236,6 +5439,11 @@ components:
           format: date-time
           type: string
         createdByUserId:
+          type: string
+        docCount:
+          format: int64
+          type: integer
+        docTypeScope:
           type: string
         errorCode:
           type: string
@@ -5249,6 +5457,8 @@ components:
           type: string
         id:
           type: string
+        iqVersion:
+          type: string
         jobType:
           type: string
         phase:
@@ -5258,8 +5468,12 @@ components:
           type: integer
         recommendedOp:
           type: string
-        servingGenerationIdAtStart:
-          type: string
+        schemaVersion:
+          format: int32
+          type: integer
+        sizeBytes:
+          format: int64
+          type: integer
         startedAt:
           format: date-time
           type: string
@@ -5904,7 +6118,7 @@ components:
       type: http
 info:
   title: Sonatype Lifecycle Public REST API
-  version: 1.208.0-02
+  version: 1.209.0-04
 openapi: 3.0.1
 paths:
   /api/v2/ai-developer/opt-in:
@@ -6406,7 +6620,7 @@ paths:
       - Applications
   /api/v2/applications/{applicationPublicId}/reports/policyViolations/diff:
     get:
-      description: 'By configuring Lifecycle with SCM, policy evaluations can be linked
+      description: 'By configuring SCM integration, policy evaluations can be linked
         to the Git commit hash. Use this method to compare the violations between
         policy evaluations for 2 commits, by providing the linked commit hashes.
 
@@ -9298,7 +9512,12 @@ paths:
             authenticate with the Zscaler server.</li><li>`password` is always null,
             never included for security purposes for this method.</Li><li>`hostname`
             is the hostname or IP address of the Zscaler server.</li><li>`apiKey`
-            is the apiKey used for communicating with the Zscaler service.</li></ul>
+            is the apiKey used for communicating with the Zscaler service.</li><li>`maxUrls`
+            is the global maximum URLs cap (optional, nullable).</li><li>`mavenFormatMaxUrls`
+            is the per-format URL cap override for Maven (optional, nullable).</li><li>`npmFormatMaxUrls`
+            is the per-format URL cap override for NPM (optional, nullable).</li><li>`pypiFormatMaxUrls`
+            is the per-format URL cap override for PyPI (optional, nullable).</li><li>`nugetFormatMaxUrls`
+            is the per-format URL cap override for NuGet (optional, nullable).</li></ul>
         '404':
           description: No Zscaler server is currently configured with the IQ Server.
       tags:
@@ -9324,7 +9543,15 @@ paths:
           or disable the Maven format for Zscaler.</li><li>`npmFormatEnabled` - is
           the flag to enable or disable the Npm format for Zscaler.</li><li>`pypiFormatEnabled`
           - is the flag to enable or disable the Pypi format for Zscaler.</li><li>`nugetFormatEnabled`
-          - is the flag to enable or disable the Nuget format for Zscaler.</li></ul>
+          - is the flag to enable or disable the Nuget format for Zscaler.</li><li>`maxUrls`
+          - is the global maximum URLs cap (optional, nullable integer; must be at
+          least 100 when provided).</li><li>`mavenFormatMaxUrls` - is the per-format
+          URL cap override for Maven (optional, nullable positive integer).</li><li>`npmFormatMaxUrls`
+          - is the per-format URL cap override for NPM (optional, nullable positive
+          integer).</li><li>`pypiFormatMaxUrls` - is the per-format URL cap override
+          for PyPI (optional, nullable positive integer).</li><li>`nugetFormatMaxUrls`
+          - is the per-format URL cap override for NuGet (optional, nullable positive
+          integer).</li></ul>
       responses:
         '204':
           content:
@@ -9879,6 +10106,168 @@ paths:
             information, policy information, and the priority assigned to it.'
       tags:
       - Developer Priorities
+  /api/v2/ecosystemConfigurations/{ownerType}/{ownerId}:
+    get:
+      description: "List ecosystem configurations defined directly on the specified\
+        \ owner. Does not include inherited configurations \u2014 use the /applicable\
+        \ variant for those. Permissions required: View IQ Elements"
+      operationId: getEcosystemConfigurations
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+                type: array
+          description: Array of ecosystem configuration descriptions.
+      tags:
+      - Ecosystem Configurations
+    post:
+      description: 'Create an ecosystem configuration on the specified owner. Permissions
+        required: Edit IQ Elements'
+      operationId: addEcosystemConfiguration
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+        description: Ecosystem configuration payload. Leave id unset.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+          description: The newly created ecosystem configuration, including its assigned
+            id.
+      tags:
+      - Ecosystem Configurations
+    put:
+      description: 'Update an existing ecosystem configuration. The id in the body
+        identifies the configuration to update. Permissions required: Edit IQ Elements'
+      operationId: updateEcosystemConfiguration
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+        description: Ecosystem configuration payload with id set.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEcosystemConfigurationDTO'
+          description: The updated ecosystem configuration.
+      tags:
+      - Ecosystem Configurations
+  /api/v2/ecosystemConfigurations/{ownerType}/{ownerId}/applicable:
+    get:
+      description: 'List all ecosystem configurations applicable to the specified
+        owner, grouped by the owner they are defined on and returned in hierarchy
+        order (local first, then walking up the organization ancestry). Permissions
+        required: View IQ Elements'
+      operationId: getApplicableEcosystemConfigurations
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicableEcosystemConfigurations'
+          description: Grouped ecosystem configuration descriptions.
+      tags:
+      - Ecosystem Configurations
+  /api/v2/ecosystemConfigurations/{ownerType}/{ownerId}/{configurationId}:
+    delete:
+      description: 'Delete an ecosystem configuration. Permissions required: Edit
+        IQ Elements'
+      operationId: deleteEcosystemConfiguration
+      parameters:
+      - in: path
+        name: ownerType
+        required: true
+        schema:
+          enum:
+          - application
+          - organization
+          pattern: application|organization
+          type: string
+      - in: path
+        name: ownerId
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: configurationId
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Ecosystem configuration deleted successfully.
+      tags:
+      - Ecosystem Configurations
   /api/v2/endpoints/{apiType}:
     get:
       description: Use this method to retrieve the OpenAPI documentation for the specified
@@ -10155,7 +10544,9 @@ paths:
             component.</li><li>`matchState` indicates the whether the component is
             an `EXACT` or `SIMILAR` match to the known  components or is `UNKNOWN`.</li><li>`repositoryId`
             is the ID of the repository where the component is stored.</li><li>`quarantined`
-            indicates whether the component is quarantined.</li></ul>
+            indicates whether the component is quarantined.</li><li>`managerType`
+            indicates whether the repository is owned by a `virtual` or `traditional`
+            repository manager.</li></ul>
           headers:
             Link:
               description: Pagination links (first, last, next, prev)
@@ -10210,6 +10601,16 @@ paths:
         schema:
           format: int32
           type: integer
+      - description: Enter the repository manager types to include, `virtual` and/or
+          `traditional`. Ignored unless Firewall Enterprise and its config plane are
+          enabled.
+        in: query
+        name: managerType
+        schema:
+          items:
+            type: string
+          type: array
+          uniqueItems: true
       - description: Enter `quarantineTime` to sort the results by quarantine time.
         in: query
         name: sortBy
@@ -10244,7 +10645,8 @@ paths:
             the repository name where the component is stored.</li><li>`hash` is the
             hash of the component.</li><li>`matchState` indicates the whether the
             component is an `EXACT` or `SIMILAR` match to the known components or
-            is `UNKNOWN`.</li></ul>
+            is `UNKNOWN`.</li><li>`managerType` indicates whether the repository is
+            owned by a `virtual` or `traditional` repository manager.</li></ul>
           headers:
             Link:
               description: Pagination links (first, last, next, prev)
@@ -11133,7 +11535,6 @@ paths:
           description: List of GitHub Apps
       summary: List GitHub Apps for an owner
       tags:
-      - GitHub App
       - GitHub App Configuration
   /api/v2/githubApp/manifest:
     post:
@@ -11207,27 +11608,30 @@ paths:
         redirect to the configuration page
       operationId: handleInstallationSetup
       parameters:
-      - description: GitHub App installation ID
+      - description: GitHub App installation ID; absent when the install waits for
+          an organisation owner's approval
         in: query
         name: installation_id
-        required: true
         schema:
           format: int64
           minimum: 1
           type: integer
-      - description: State token for CSRF protection
+      - description: State token for CSRF protection; absent when GitHub reports an
+          installation update
         in: query
         name: state
-        required: true
         schema:
-          minLength: 1
           type: string
-      - description: OAuth authorization code
+      - description: OAuth authorization code; absent when GitHub reports an installation
+          update
         in: query
         name: code
-        required: true
         schema:
-          minLength: 1
+          type: string
+      - description: 'What the installer did on GitHub: install, update or request'
+        in: query
+        name: setup_action
+        schema:
           type: string
       responses:
         '302':
@@ -11266,7 +11670,36 @@ paths:
           description: GitHub App not found for specified owner
       summary: Delete a GitHub App
       tags:
-      - GitHub App
+      - GitHub App Configuration
+  /api/v2/githubApp/{githubAppId}/permissions:
+    get:
+      description: "Reports the permissions IQ requires that the App's installation\
+        \ has not been granted, and the events it is not subscribed to, so an App\
+        \ created before they were added can be updated on GitHub. \n\n**Permissions\
+        \ Required:** View IQ Elements"
+      operationId: checkPermissions
+      parameters:
+      - description: GitHub App ID
+        in: path
+        name: githubAppId
+        required: true
+        schema:
+          type: string
+      - description: Owner (organization/application) ID
+        in: query
+        name: ownerId
+        required: true
+        schema:
+          minLength: 1
+          type: string
+      responses:
+        '200':
+          description: The missing permissions and events, each null when GitHub could
+            not be asked
+        '404':
+          description: GitHub App not found for specified owner
+      summary: Check a GitHub App's granted permissions
+      tags:
       - GitHub App Configuration
   /api/v2/hostedRepositoryComponent/{hrcId}/reports/{reportId}/vulnerabilities/{vulnerabilityId}/reachability-evidence:
     get:
@@ -12866,6 +13299,16 @@ paths:
             type: string
           type: array
           uniqueItems: true
+      - description: Set to true to include the `dependencyType` of each violating
+          component (Direct, Transitive, Inner Source Direct, Inner Source Transitive
+          or Unknown). Defaults to false because resolving it reads the scan report
+          once per application and stage; callers that do not set it see an unchanged
+          response.
+        in: query
+        name: includeDependencyType
+        schema:
+          default: false
+          type: boolean
       responses:
         '200':
           content:
@@ -12878,7 +13321,17 @@ paths:
             the violation was first detected.</li><li>`waiveTime` indicates the date
             and time when the violation was waived.</li><li>`legacyTime` indicates
             the date and time when the violation was assigned as a legacy violation.</li><li>`reference`
-            is the reference data that triggered the violation.</li></ul>
+            is the reference data that triggered the violation.</li><li>`reachabilityStatus`
+            indicates whether the vulnerable code is reachable, when reachability
+            analysis has run for the violation. One of `reachable`, `non-reachable`
+            or `unknown`; a present `unknown` means analysis ran but could not determine
+            reachability. Omitted for violations that have no reachability data. Note
+            that the cross-stage violation endpoint reports this same concept in upper
+            snake case (`REACHABLE`, `NON_REACHABLE`, `UNKNOWN`); normalise casing
+            when consuming both.</li><li>`dependencyType` indicates whether the violating
+            component is a direct or transitive dependency. One of `Direct`, `Transitive`,
+            `Inner Source Direct`, `Inner Source Transitive` or `Unknown`. Only present
+            when `includeDependencyType=true` is requested.</li></ul>
       tags:
       - Policy Violation Details
   /api/v2/policyViolations/crossStage:
@@ -13776,8 +14229,8 @@ paths:
               $ref: '#/components/schemas/ApiRequestPolicyWaiverDTO'
         description: The request JSON should contain<ol><li>comment (optional, default
           null) to indicate the waiver request reason</li><li>policyViolationLink
-          (link to the policy violation page in the Lifecycle UI)</li><li>addWaiverLink
-          (link to the Add Waiver page in the Lifecycle UI)</li></ol>
+          (link to the policy violation page in the UI)</li><li>addWaiverLink (link
+          to the Add Waiver page in the UI)</li></ol>
       responses:
         '204':
           description: Waiver request webhook triggered successfully
@@ -15306,6 +15759,8 @@ paths:
       - Roles
     put:
       description: 'Use this method to update an existing custom role and its permissions.
+        Permissions the role already holds that are not currently offered by the role
+        editor are kept, and cannot be revoked until they are offered again.
 
 
         Permissions required: Edit Roles'
@@ -15592,18 +16047,16 @@ paths:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/cancel:
     post:
-      description: 'Request cancellation of an in-flight Advanced Search index rebuild.
-        On a Lucene-backed deployment the previous complete index continues to serve
-        search results. Cancellation is not supported on OpenSearch-backed deployments,
-        where the rebuild runs to completion. Use the status method to confirm whether
-        a rebuild is still in progress.
+      description: 'Cancelling an Advanced Search index rebuild is not supported.
+        The request has no effect and the rebuild runs to completion. Use the status
+        method to confirm whether a rebuild is still in progress.
 
 
         Permissions required: Edit System Configuration and Users'
       operationId: cancelSearchIndexRebuild
       responses:
         '204':
-          description: Cancel requested.
+          description: Request accepted. It has no effect.
       tags:
       - Advanced Search
   /api/v2/search/advanced/index/generations:
@@ -15620,29 +16073,10 @@ paths:
         default: *id010
       tags:
       - Advanced Search Index Health
-  /api/v2/search/advanced/index/generations/{generationId}/revert:
-    post:
-      description: Revert Advanced Search to the previous retired generation.
-      operationId: revertGeneration
-      parameters:
-      - in: path
-        name: generationId
-        required: true
-        schema:
-          type: string
-      responses:
-        '200': &id011
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiSearchIndexGenerationDTO'
-          description: default response
-        default: *id011
-      tags:
-      - Advanced Search Index Health
   /api/v2/search/advanced/index/jobs:
     post:
-      description: Start an index job (FULL_REBUILD or FIRST_TIME_INDEX).
+      description: Start an index job (FULL_REBUILD or FIRST_TIME_INDEX). Turns the
+        Nexus One feature flag on for this tenant first if it was off.
       operationId: startJob
       requestBody:
         content:
@@ -15656,6 +16090,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/SearchIndexJob'
           description: Created job
+        '400':
+          description: Invalid jobType, trigger or docTypes
+        '402':
+          description: Not licensed for the Nexus One index
+        '409':
+          description: An index job is already active, or doc types were named with
+            no index serving to copy the rest from
+        '502':
+          description: Doc types were named and OpenSearch could not be reached or
+            is not configured, so nothing is serving to copy the rest from
       tags:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/jobs/active:
@@ -15675,7 +16119,8 @@ paths:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/jobs/cancel:
     post:
-      description: Cancel the active job; Lucene keeps serving the blue index.
+      description: Cancel the active job; the previous serving index keeps answering
+        searches.
       operationId: cancelActiveJob
       responses:
         '200':
@@ -15700,7 +16145,7 @@ paths:
           format: int32
           type: integer
       responses:
-        '200': &id012
+        '200': &id011
           content:
             application/json:
               schema:
@@ -15708,7 +16153,7 @@ paths:
                   $ref: '#/components/schemas/ApiSearchIndexHistoryEntryDTO'
                 type: array
           description: default response
-        default: *id012
+        default: *id011
       tags:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/jobs/{jobId}:
@@ -15722,13 +16167,13 @@ paths:
         schema:
           type: string
       responses:
-        '200': &id013
+        '200': &id012
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/SearchIndexJob'
           description: default response
-        default: *id013
+        default: *id012
       tags:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/jobs/{jobId}/events:
@@ -15748,7 +16193,7 @@ paths:
           format: int32
           type: integer
       responses:
-        '200': &id014
+        '200': &id013
           content:
             application/json:
               schema:
@@ -15756,13 +16201,32 @@ paths:
                   $ref: '#/components/schemas/SearchIndexJobEvent'
                 type: array
           description: default response
-        default: *id014
+        default: *id013
+      tags:
+      - Advanced Search Index Health
+  /api/v2/search/advanced/index/setup:
+    get:
+      description: 'Return what the Search Index setup page shows: whether Nexus One
+        has an OpenSearch connection configured, whether the cluster answers on it,
+        and the state of the index. The index block is read from the database only,
+        so it keeps answering when the cluster is down; the connection block is a
+        probe reused for a few seconds. Every timestamp is an ISO-8601 UTC instant;
+        no field carries a host name or free text.'
+      operationId: getSetup
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiSearchIndexSetupDTO'
+          description: Setup status
       tags:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/unlock/complete:
     post:
-      description: Mark unlock UNLOCKED after admin Test step. This also turns Nexus
-        One on for users.
+      deprecated: true
+      description: 'Deprecated: the preview unlock no longer gates Nexus One. Mark
+        unlock UNLOCKED after the admin Test step.'
       operationId: completeUnlock
       responses:
         '200':
@@ -15775,7 +16239,9 @@ paths:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/unlock/ready-to-test:
     post:
-      description: Mark unlock READY_TO_TEST after index job completes.
+      deprecated: true
+      description: 'Deprecated: the preview unlock no longer gates Nexus One. Mark
+        unlock READY_TO_TEST after index job completes.'
       operationId: markUnlockReadyToTest
       responses:
         '200':
@@ -15788,8 +16254,9 @@ paths:
       - Advanced Search Index Health
   /api/v2/search/advanced/index/unlock/start:
     post:
-      description: Start Nexus One index setup (first-time or regenerate). Moves unlock
-        to INDEXING.
+      deprecated: true
+      description: 'Deprecated: use POST index/jobs. Start Nexus One index setup (first-time
+        or regenerate). Moves unlock to INDEXING.'
       operationId: startUnlockIndexing
       responses:
         '200':
@@ -15944,10 +16411,10 @@ paths:
       tags:
       - Source Control
     post:
-      description: 'Use this method to apply user mappings from SCM (GitHub) to Lifecycle.
-        The user mappings will be inherited by all child organizations and applications
-        in the organization hierarchy. If a user mapping for an organization already
-        exists, it will be replaced with new mappings provided here.
+      description: 'Use this method to apply user mappings from SCM (GitHub) to IQ
+        users. The user mappings will be inherited by all child organizations and
+        applications in the organization hierarchy. If a user mapping for an organization
+        already exists, it will be replaced with new mappings provided here.
 
 
         Permissions required: Edit IQ Elements'
@@ -16120,11 +16587,13 @@ paths:
       - Source Control
   /api/v2/sourceControl/relay/deregister:
     post:
-      description: "Deregister this IQ Server from the SCM webhook relay. Drops the\
-        \ local relay_configuration row and asks the relay to delete the customer\
-        \ record (SQS queue + DynamoDB row). Required before switching auth modes\
-        \ (PAT \u2194 GitHub App) since the relay rejects cross-mode switching of\
-        \ an existing customer.\n\nPermissions required: System Configuration."
+      description: 'Deregister this IQ Server from the SCM webhook relay. Drops the
+        local relay_configuration row and asks the relay to delete the customer record
+        (SQS queue + DynamoDB row), including both its PAT webhook URL and its GitHub
+        App installations.
+
+
+        Permissions required: System Configuration.'
       operationId: deregisterFromRelay
       responses:
         '200':
@@ -16196,15 +16665,15 @@ paths:
   /api/v2/sourceControl/relayWebhookSecret:
     get:
       description: "Returns the per-customer HMAC signing secret used to verify webhook\
-        \ deliveries from the SCM provider, when a PAT-mode relay registration exists.\
-        \ GitHub App registrations have no per-customer secret and return 404. \n\n\
-        Permissions required: Manage Automatic SCM Configuration."
+        \ deliveries from the SCM provider, when the relay registration has a PAT\
+        \ webhook URL. A registration with GitHub App installations only has no per-customer\
+        \ secret and returns 404. \n\nPermissions required: Manage Automatic SCM Configuration."
       operationId: getRelayWebhookSecret
       responses:
         '200':
           description: The webhook signing secret.
         '404':
-          description: No PAT-mode relay registration exists.
+          description: No relay registration with a PAT webhook URL exists.
         '412':
           description: The relay integration feature flag is disabled.
       tags:
@@ -17374,7 +17843,7 @@ security:
 - BasicAuth: []
   BearerAuth: []
 tags:
-- description: Use the Advanced Search REST API to perform searches on Lifecycle application
+- description: Use the Advanced Search REST API to perform searches on application
     scan reports.
   name: Advanced Search
 - description: Index Analyze status and rebuild/cleanup job control.
@@ -17444,8 +17913,8 @@ tags:
 - description: Use this REST API to manage the configuration of an existing Atlassian
     Crowd Server that is being used to authenticate users for IQ Server.
   name: Config Crowd
-- description: 'Use this REST API to manage Jira configurations to receive notifications
-    from Lifecycle.
+- description: 'Use this REST API to manage Jira configurations to receive policy
+    violation notifications.
 
 
     It is supported for Jira Cloud, Jira Server, and Jira Data Center.'
@@ -17489,6 +17958,10 @@ tags:
 - description: Use this REST API to export Sonatype Developer component priorities
     data, including security reachability data.
   name: Developer Priorities
+- description: Owner-scoped configurations that control how Sonatype Lifecycle identifies
+    and evaluates components from a specific package ecosystem (e.g. PyPI). Applies
+    during download, analysis and policy evaluation.
+  name: Ecosystem Configurations
 - description: This REST API returns the OpenAPI documentation for the specified IQ
     Server REST API.
   name: Endpoints
@@ -17498,7 +17971,6 @@ tags:
     metrics, repository management, quarantine operations, and namespace confusion
     prevention.
   name: Firewall
-- name: GitHub App
 - description: GitHub App configuration operations
   name: GitHub App Configuration
 - description: Use this REST API to retrieve the data from a hosted repository component
@@ -17519,13 +17991,13 @@ tags:
 - description: Use this REST API to manage license overrides for components in your
     applicationsorganizations and repositories.
   name: License Overrides
-- description: Lifecycle operations
+- description: Retrieve the connected Nexus Repository Manager instances
   name: Lifecycle
 - description: Use this REST API to create new organizations, retrieve, edit or delete
     existing organizations.
   name: Organizations
 - description: Use this REST API to retrieve details on all existing policies in your
-    instance of Lifecycle.
+    instance.
   name: Policies
 - description: "Use this REST API to perform an application policy evaluation. Policy\
     \ evaluations are executed asynchronously.<p>This is a 2-step process that involves:\
