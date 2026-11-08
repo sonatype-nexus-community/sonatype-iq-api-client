@@ -15,6 +15,9 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions:
+    contents: read
+
 env:
     OPEN_API_GENERATOR_VERSION: 'v7.16.0'
     PYTHON_VERSION_DEFAULT: '3.12'
@@ -30,23 +33,27 @@ jobs:
         steps:
             - name: Checkout
               # see https://github.com/actions/checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
             - name: Create Output Directory
               run: mkdir out/${{ matrix.language }}
 
             - name: Run OpenAPI Generator
-              uses: addnab/docker-run-action@v3
-              with:
-                  image: openapitools/openapi-generator-cli:${{ env.OPEN_API_GENERATOR_VERSION }}
-                  options: -v ${{ github.workspace }}:/local
-                  run: /usr/local/bin/docker-entrypoint.sh batch --clean /local/${{ matrix.language }}.yaml
+              env:
+                  LANGUAGE: ${{ matrix.language }}
+              run: |
+                  docker run --rm \
+                      -v "${GITHUB_WORKSPACE}:/local" \
+                      "openapitools/openapi-generator-cli:${OPEN_API_GENERATOR_VERSION}" \
+                      batch --clean "/local/${LANGUAGE}.yaml"
 
             - name: Copy LICENSE
               run: cp LICENSE ./out/${{ matrix.language }}
 
             - name: Save to Cache
-              uses: actions/cache/save@v4
+              uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: out/${{ matrix.language }}
                   key: '${{ matrix.language }}-${{ github.run_id }}'
@@ -58,11 +65,11 @@ jobs:
 
         steps:
             - name: Setup Go
-              uses: actions/setup-go@v5
+              uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
               with:
-                  go-version: 1.22
+                  go-version: '1.23'
             - name: Get generated code from cache
-              uses: actions/cache/restore@v4
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: out/go
                   key: 'go-${{ github.run_id }}'
@@ -83,16 +90,16 @@ jobs:
 
         steps:
             - name: Set up Python
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
               with:
                   python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
             - name: Install poetry
               # see https://github.com/marketplace/actions/setup-poetry
-              uses: Gr1N/setup-poetry@v9
+              uses: Gr1N/setup-poetry@a05ec55cc26a7270e246efc79ee3ce1bcd6814a0 # v10
               with:
                   poetry-version: ${{ env.POETRY_VERSION }}
             - name: Get generated code from cache
-              uses: actions/cache/restore@v4
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: out/python
                   key: 'python-${{ github.run_id }}'
@@ -118,11 +125,11 @@ jobs:
 
         steps:
             - name: Setup Node
-              uses: actions/setup-node@v4
+              uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
               with:
                   node-version: latest
             - name: Get generated code from cache
-              uses: actions/cache/restore@v4
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: out/typescript
                   key: 'typescript-${{ github.run_id }}'
