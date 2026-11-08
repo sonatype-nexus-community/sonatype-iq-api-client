@@ -9,6 +9,8 @@ concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
 
+permissions: {}
+
 env:
     PYTHON_VERSION_DEFAULT: '3.12'
     IQ_SERVER_PORT: '8070'
@@ -18,12 +20,17 @@ jobs:
     detect-and-update:
         name: Detect New IQ Release and Update Spec
         runs-on: ubuntu-latest
+        permissions:
+            # push the feat/iq-* branch; the PR itself is opened with GH_PAT
+            contents: write
 
         steps:
             - name: Checkout
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+              # zizmor: ignore[artipacked] credentials must persist - 'Create branch and commit updated spec' runs `git push`
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
+                  persist-credentials: true
 
             - name: Get latest IQ version from Sonatype release page
               id: iq_latest
@@ -72,7 +79,7 @@ jobs:
 
             - name: Notify Slack - new version detected
               if: steps.check.outputs.skip != 'true'
-              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
               with:
                   webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
                   webhook-type: incoming-webhook
@@ -127,7 +134,7 @@ jobs:
 
             - name: Set up Python
               if: steps.check.outputs.skip != 'true'
-              uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+              uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
               with:
                   python-version: ${{ env.PYTHON_VERSION_DEFAULT }}
 
@@ -182,7 +189,7 @@ jobs:
 
             - name: Notify Slack - PR created
               if: steps.check.outputs.skip != 'true'
-              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
               with:
                   webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
                   webhook-type: incoming-webhook
@@ -193,7 +200,7 @@ jobs:
 
             - name: Notify Slack - workflow failure
               if: failure()
-              uses: slackapi/slack-github-action@45a88b9581bfab2566dc881e2cd66d334e621e2c # v3.0.3
+              uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
               with:
                   webhook: ${{ secrets.SLACK_WEBHOOK_OSS_FUN }}
                   webhook-type: incoming-webhook
