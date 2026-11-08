@@ -112,6 +112,54 @@ if 'components' in json_spec and 'schemas' in json_spec['components'] \
         }
     }
 
+# Extend SystemConfig with the remaining Configuration REST API properties
+# https://help.sonatype.com/en/configuration-rest-api.html
+# All nullable - IQ Server returns null for unset properties.
+# `enableSsoOnly` is not a config property; use POST/DELETE /api/v2/config/features/{feature}.
+if 'components' in json_spec and 'schemas' in json_spec['components'] \
+        and 'SystemConfig' in json_spec['components']['schemas'] \
+        and 'SystemConfigProperty' in json_spec['components']['schemas']:
+    print('Extending schema: SystemConfig...')
+    system_config_scalars = {
+        'sessionTimeout': 'integer',
+        'eventBus.maxThreadPoolSize': 'integer',
+        'policyMonitoringHour': 'integer',
+        'maxAdvancedSearchClauseCount': 'integer',
+        'integrationsSupportedVersionCount': 'integer',
+        'csrfProtection': 'boolean',
+        'waivedComponentUpgradeMonitoringEnabled': 'boolean',
+        'ADVANCED_REPORTING_INSIGHTS_ENABLED': 'boolean',
+        'alpObservedLicenseDetectionEnabled': 'boolean',
+        'userAgentSuffix': 'string',
+        'hdsUrl': 'string',
+        'webhookSecretPassphrase': 'string',
+        'advancedSearchCSVExportDelimiter': 'string',
+        # Enum-like (source, build, stage-release, release, operate, proxy, compliance)
+        'successMetricsStageId': 'string',
+        # Enum-like (withReports)
+        'purgeScanFiles': 'string'
+    }
+    system_config_lists = ['frameAncestorsAllowlist', 'apiAccessAllowList']
+
+    system_config_props = json_spec['components']['schemas']['SystemConfig']['properties']
+    system_config_enum = json_spec['components']['schemas']['SystemConfigProperty']['enum']
+    for prop_name, prop_type in system_config_scalars.items():
+        system_config_props[prop_name] = {
+            'nullable': True,
+            'type': prop_type
+        }
+    for prop_name in system_config_lists:
+        system_config_props[prop_name] = {
+            'nullable': True,
+            'type': 'array',
+            'items': {
+                'type': 'string'
+            }
+        }
+    for prop_name in [*system_config_scalars, *system_config_lists]:
+        if prop_name not in system_config_enum:
+            system_config_enum.append(prop_name)
+
 # Fix Response schema for GET /api/v2/config
 if 'paths' in json_spec and '/api/v2/config' in json_spec['paths']:
     if 'delete' in json_spec['paths']['/api/v2/config']:
